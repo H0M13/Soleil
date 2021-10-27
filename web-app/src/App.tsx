@@ -1,12 +1,15 @@
 import React from "react";
 import "./App.css";
 import { MainLayout } from "./MainLayout";
+import { StpProvider } from "./context/StpContext";
 
 function App() {
   return (
-    <div className="App">
-      <MainLayout />
-    </div>
+    <StpProvider>
+      <div className="App">
+        <MainLayout />
+      </div>
+    </StpProvider>
   );
 }
 

@@ -12833,7 +12833,7 @@ web3-eth-accounts@1.6.0:
     web3-core-method "1.6.0"
     web3-utils "1.6.0"
 
-web3-eth-contract@1.6.0:
+web3-eth-contract@1.6.0, web3-eth-contract@^1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/web3-eth-contract/-/web3-eth-contract-1.6.0.tgz#deb946867ad86d32bcbba899d733b681b25ea674"
   integrity sha512-ZUtO77zFnxuFtrc+D+iJ3AzNgFXAVcKnhEYN7f1PNz/mFjbtE6dJ+ujO0mvMbxIZF02t9IZv0CIXRpK0rDvZAw==
@@ -12943,7 +12943,7 @@ web3-shh@1.6.0:
     web3-core-subscriptions "1.6.0"
     web3-net "1.6.0"
 
-web3-utils@1.6.0:
+web3-utils@1.6.0, web3-utils@^1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.6.0.tgz#1975c5ee5b7db8a0836eb7004848a7cd962d1ddc"
   integrity sha512-bgCAWAeQnJF035YTFxrcHJ5mGEfTi/McsjqldZiXRwlHK7L1PyOqvXiQLE053dlzvy1kdAxWl/sSSfLMyNUAXg==

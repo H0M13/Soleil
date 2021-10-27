@@ -1,16 +1,16 @@
 import React from "react";
 import { Box, Container, createTheme, ThemeProvider } from "@mui/material";
 import { Header } from "./features/header";
+import { PropertiesDisplay } from "./features/propertiesDisplay/PropertiesDisplay";
 import useBlobity from "blobity/lib/useBlobity";
 
 export const MainLayout = () => {
   const options = {
     licenseKey: "opensource",
     color: "rgb(235, 64, 52)",
-    opacity: 0.6,
-    dotColor: "rgb(255, 0, 0)",
+    dotColor: "rgb(255, 255, 255)",
     focusableElementsOffsetX: 8,
-    focusableElementsOffsetY: 8
+    focusableElementsOffsetY: 8,
   };
   useBlobity(options);
 
@@ -43,6 +43,7 @@ export const MainLayout = () => {
           containedPrimary: {
             "&:hover": {
               backgroundColor: "rgb(27, 116, 242)",
+              cursor: "unset",
             },
           },
         },
@@ -76,10 +77,12 @@ export const MainLayout = () => {
         </Box>
         <Box
           sx={{
-            flex: "auto"
+            flex: "auto",
           }}
         >
-          <Container />
+          <Container>
+            <PropertiesDisplay />
+          </Container>
         </Box>
         <Box
           sx={{
