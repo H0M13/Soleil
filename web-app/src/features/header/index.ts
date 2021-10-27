@@ -1,1 +1,1 @@
-export { AuthManager } from "./AuthManager"
+export { Header } from "./Header"
