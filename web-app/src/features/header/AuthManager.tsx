@@ -3,11 +3,12 @@ import { Button } from "@mui/material";
 import { useMoralis } from "react-moralis";
 
 export const AuthManager = () => {
-  const { authenticate, isAuthenticated, isAuthenticating, logout } = useMoralis();
+  const { authenticate, isAuthenticated, isAuthenticating, logout } =
+    useMoralis();
 
   if (isAuthenticated) {
     return (
-      <Button variant="contained" onClick={logout}>
+      <Button variant="contained" disableElevation onClick={logout}>
         Logout
       </Button>
     );
@@ -18,7 +19,12 @@ export const AuthManager = () => {
   };
 
   return (
-    <Button variant="contained" disabled={isAuthenticating} onClick={handleConnect}>
+    <Button
+      variant="contained"
+      disableElevation
+      disabled={isAuthenticating}
+      onClick={handleConnect}
+    >
       Connect
     </Button>
   );

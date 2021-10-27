@@ -1,12 +1,23 @@
 import React from "react";
 import { Box, Container, createTheme, ThemeProvider } from "@mui/material";
 import { Header } from "./features/header";
+import useBlobity from "blobity/lib/useBlobity";
 
 export const MainLayout = () => {
+  const options = {
+    licenseKey: "opensource",
+    color: "rgb(235, 64, 52)",
+    opacity: 0.6,
+    dotColor: "rgb(255, 0, 0)",
+    focusableElementsOffsetX: 8,
+    focusableElementsOffsetY: 8
+  };
+  useBlobity(options);
+
   const themeOptions = createTheme({
     palette: {
       primary: {
-        main: "#6ce8d2",
+        main: "rgb(27, 116, 242)",
       },
       secondary: {
         main: "#4493cf",
@@ -21,20 +32,22 @@ export const MainLayout = () => {
       },
     },
     shape: {
-        borderRadius: 0
+      borderRadius: 0,
     },
-    // components: {
-    //   // Name of the component
-    //   MuiButton: {
-    //     styleOverrides: {
-    //       // Name of the slot
-    //       root: {
-    //         // Some CSS
-    //         fontSize: "1rem",
-    //       },
-    //     },
-    //   },
-    // },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            boxShadow: "10px 10px black",
+          },
+          containedPrimary: {
+            "&:hover": {
+              backgroundColor: "rgb(27, 116, 242)",
+            },
+          },
+        },
+      },
+    },
   });
 
   return (
@@ -48,12 +61,10 @@ export const MainLayout = () => {
           left: 0,
           display: "flex",
           flexDirection: "column",
-          backgroundColor: "background.default",
         }}
       >
         <Box
           sx={{
-            backgroundColor: "transparent",
             p: {
               xs: 1,
               md: 2,
@@ -65,14 +76,13 @@ export const MainLayout = () => {
         </Box>
         <Box
           sx={{
-            flex: "auto",
+            flex: "auto"
           }}
         >
           <Container />
         </Box>
         <Box
           sx={{
-            backgroundColor: "transparent",
             p: {
               xs: 1,
               md: 2,
