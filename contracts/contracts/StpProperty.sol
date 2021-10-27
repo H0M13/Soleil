@@ -15,6 +15,8 @@ contract StpProperty is ERC721, Ownable {
     Property[] public properties;
     string private _baseURIextended;
 
+    event CreateProperty(uint256 tokenId);
+
     constructor(string memory name, string memory symbol)
         ERC721(name, symbol)
     {
@@ -25,7 +27,7 @@ contract StpProperty is ERC721, Ownable {
         string memory propertyNameOrNumber,
         string memory streetName,
         string memory postCode
-    ) public onlyOwner returns (uint256 tokenId) {
+    ) public onlyOwner {
         uint256 newPropertyId = properties.length;
         properties.push(
             Property(
@@ -35,7 +37,7 @@ contract StpProperty is ERC721, Ownable {
             )
         );
         _safeMint(propertyOwner, newPropertyId);
-        return newPropertyId;
+        emit CreateProperty(newPropertyId);
     }
 
     function setBaseURI(string memory baseURI_) external onlyOwner() {
