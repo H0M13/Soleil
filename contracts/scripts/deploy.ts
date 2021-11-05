@@ -14,12 +14,12 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const StpProperty = await ethers.getContractFactory("StpProperty");
-  const stpProperty = await StpProperty.deploy("Smart Town Planner", "STP");
+  const PoolManager = await ethers.getContractFactory("PoolManager");
+  const poolManager = await PoolManager.deploy("");
 
-  await stpProperty.deployed();
+  await poolManager.deployed();
 
-  console.log("Smart Town Planner deployed to:", stpProperty.address);
+  console.log("Soleil Pool Manager deployed to:", poolManager.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

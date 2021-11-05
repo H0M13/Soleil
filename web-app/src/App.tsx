@@ -1,15 +1,15 @@
 import React from "react";
 import "./App.css";
 import { MainLayout } from "./MainLayout";
-import { StpProvider } from "./context/StpContext";
+import { SoleilProvider } from "./context/SoleilContext";
 
 function App() {
   return (
-    <StpProvider>
+    <SoleilProvider>
       <div className="App">
         <MainLayout />
       </div>
-    </StpProvider>
+    </SoleilProvider>
   );
 }
 

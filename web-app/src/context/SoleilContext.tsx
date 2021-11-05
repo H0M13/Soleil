@@ -1,20 +1,20 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useMoralis } from "react-moralis";
-import contractJson from "./stpContract.json";
+import contractJson from "./soleilContract.json";
 import { AbiItem } from "web3-utils";
 import { Contract } from "web3-eth-contract";
 
-interface StpContextValue {
+interface SoleilContextValue {
   contract?: Contract;
 }
 
-const StpContext = createContext<StpContextValue | undefined>(undefined);
+const SoleilContext = createContext<SoleilContextValue | undefined>(undefined);
 
-interface StpProviderProps {
+interface SoleilProviderProps {
   children: React.ReactNode;
 }
 
-const StpProvider = ({ children }: StpProviderProps) => {
+const SoleilProvider = ({ children }: SoleilProviderProps) => {
   const { web3, isWeb3Enabled, web3EnableError, enableWeb3, user, Moralis } =
     useMoralis();
 
@@ -46,22 +46,22 @@ const StpProvider = ({ children }: StpProviderProps) => {
   }, [web3, isWeb3Enabled]);
 
   return (
-    <StpContext.Provider
+    <SoleilContext.Provider
       value={{
         contract,
       }}
     >
       {children}
-    </StpContext.Provider>
+    </SoleilContext.Provider>
   );
 };
 
-const useStp = () => {
-  const context = useContext(StpContext);
+const useSoleil = () => {
+  const context = useContext(SoleilContext);
   if (context === undefined) {
-    throw new Error("useStp must be used within a StpProvider");
+    throw new Error("useSoleil must be used within a SoleilProvider");
   }
   return context;
 };
 
-export { StpProvider, useStp };
+export { SoleilProvider, useSoleil };
