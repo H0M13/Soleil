@@ -1,6 +1,7 @@
 import React from "react";
-import { Container, Typography } from "@mui/material";
+import { Container } from "@mui/material";
 import { AuthManager } from "./AuthManager";
+import { Logo } from "./Logo"
 
 export const Header = () => {
   return (
@@ -8,10 +9,11 @@ export const Header = () => {
       maxWidth="xl"
       sx={{
         display: "flex",
-        justifyContent: "space-between",    
+        justifyContent: "space-between",
+        alignItems: "flex-start"    
       }}
     >
-      <Typography>Logo</Typography>
+      <Logo />
       <AuthManager />
     </Container>
   );

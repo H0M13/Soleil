@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Container, createTheme, ThemeProvider } from "@mui/material";
 import { Header } from "./features/header";
-import { PropertiesDisplay } from "./features/propertiesDisplay/PropertiesDisplay";
+import { RegisterSite } from "./features/registerSite";
 import useBlobity from "blobity/lib/useBlobity";
 
 export const MainLayout = () => {
@@ -70,7 +70,7 @@ export const MainLayout = () => {
               xs: 1,
               md: 2,
             },
-            height: "70px",
+            height: "fit-content",
           }}
         >
           <Header />
@@ -81,7 +81,7 @@ export const MainLayout = () => {
           }}
         >
           <Container>
-            <PropertiesDisplay />
+            <RegisterSite />
           </Container>
         </Box>
         <Box
