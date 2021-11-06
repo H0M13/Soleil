@@ -1,8 +1,12 @@
 import React from "react";
 import { Box, Container, createTheme, ThemeProvider } from "@mui/material";
-import { Header } from "./features/header";
-import { SitesDisplay } from "./features/sitesDisplay";
-import { RegisterSite } from "./features/registerSite";
+import {
+  Header,
+  SitesDisplay,
+  RegisterSite,
+  ForStakers,
+  ForSiteOwners,
+} from "./features";
 import useBlobity from "blobity/lib/useBlobity";
 
 export const MainLayout = () => {
@@ -49,6 +53,13 @@ export const MainLayout = () => {
           },
         },
       },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            boxShadow: "10px 10px black",
+          },
+        },
+      },
     },
   });
 
@@ -82,6 +93,20 @@ export const MainLayout = () => {
           }}
         >
           <Container>
+            <Box
+              sx={{
+                display: "flex",
+                gap: (theme) => theme.spacing(2),
+                justifyContent: "space-around",
+                my: {
+                  xs: 2,
+                  md: 4,
+                },
+              }}
+            >
+              <ForStakers />
+              <ForSiteOwners />
+            </Box>
             <SitesDisplay />
             <RegisterSite />
           </Container>
