@@ -1,14 +1,16 @@
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { useMoralis } from "react-moralis"
+import { useMoralis } from "react-moralis";
 
 export const RegisterSite = () => {
+  //  TODO: Either only allow registering a site when connected or add a wallet field to form
+
   const { handleSubmit, control, reset, formState } = useForm({
     mode: "onChange",
   });
 
-  const { Moralis } = useMoralis()
+  const { Moralis } = useMoralis();
 
   const { isDirty } = formState;
 
@@ -16,12 +18,12 @@ export const RegisterSite = () => {
   const apiKeyPlaceholder = "Enter your API Key";
 
   const onSubmit = async (data: any) => {
-    const { siteId, apiKey } = data
+    const { siteId, apiKey } = data;
     const result = await Moralis.Cloud.run("verifySiteDetails", {
-        siteId,
-        apiKey 
+      siteId,
+      apiKey,
     });
-    console.log(result)
+    console.log(result);
   };
 
   return (
@@ -34,7 +36,7 @@ export const RegisterSite = () => {
           gap: (theme) => theme.spacing(2),
         }}
       >
-        <Typography>Register your site here</Typography>
+        <Typography variant="h4">Register your SolarEdge site here</Typography>
         <Controller
           render={({ field }) => (
             <TextField

@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Container, createTheme, ThemeProvider } from "@mui/material";
 import { Header } from "./features/header";
+import { SitesDisplay } from "./features/sitesDisplay";
 import { RegisterSite } from "./features/registerSite";
 import useBlobity from "blobity/lib/useBlobity";
 
@@ -81,6 +82,7 @@ export const MainLayout = () => {
           }}
         >
           <Container>
+            <SitesDisplay />
             <RegisterSite />
           </Container>
         </Box>
