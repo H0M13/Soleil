@@ -1,11 +1,14 @@
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Box, Button, TextField, Typography } from "@mui/material";
+import { useMoralis } from "react-moralis"
 
 export const RegisterSite = () => {
   const { handleSubmit, control, reset, formState } = useForm({
     mode: "onChange",
   });
+
+  const { Moralis } = useMoralis()
 
   const { isDirty } = formState;
 
@@ -13,7 +16,12 @@ export const RegisterSite = () => {
   const apiKeyPlaceholder = "Enter your API Key";
 
   const onSubmit = async (data: any) => {
-    console.log(data);
+    const { siteId, apiKey } = data
+    const result = await Moralis.Cloud.run("verifySiteDetails", {
+        siteId,
+        apiKey 
+    });
+    console.log(result)
   };
 
   return (
