@@ -1,7 +1,8 @@
 import React from "react";
 import { Container } from "@mui/material";
 import { AuthManager } from "./AuthManager";
-import { Logo } from "./Logo"
+import { Logo } from "./Logo";
+import { Link } from "react-router-dom";
 
 export const Header = () => {
   return (
@@ -10,10 +11,12 @@ export const Header = () => {
       sx={{
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "flex-start"    
+        alignItems: "flex-start",
       }}
     >
-      <Logo />
+      <Link to="/" data-blobity-radius="130">
+        <Logo />
+      </Link>
       <AuthManager />
     </Container>
   );
