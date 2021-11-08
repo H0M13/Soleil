@@ -2,14 +2,17 @@ import React from "react";
 import "./App.css";
 import { MainLayout } from "./MainLayout";
 import { SoleilProvider } from "./context/SoleilContext";
+import { BrowserRouter as Router } from "react-router-dom";
 
 function App() {
   return (
-    <SoleilProvider>
-      <div className="App">
-        <MainLayout />
-      </div>
-    </SoleilProvider>
+    <Router>
+      <SoleilProvider>
+        <div className="App">
+          <MainLayout />
+        </div>
+      </SoleilProvider>
+    </Router>
   );
 }
 

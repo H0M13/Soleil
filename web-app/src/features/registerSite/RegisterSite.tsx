@@ -2,6 +2,11 @@ import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { useMoralis } from "react-moralis";
+import { MonitoringProvider } from "./MonitoringProvider";
+import enphase from "./enphase.png";
+import tesla from "./tesla.png";
+import solarEdge from "./solarEdge.png";
+import sma from "./sma.png";
 
 export const RegisterSite = () => {
   //  TODO: Either only allow registering a site when connected or add a wallet field to form
@@ -26,17 +31,63 @@ export const RegisterSite = () => {
     console.log(result);
   };
 
+  const selectedSite = "SolarEdge";
+
   return (
     <form id="profile-form" onSubmit={handleSubmit(onSubmit)}>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
+          alignItems: "center",
           maxWidth: "600px",
-          gap: (theme) => theme.spacing(2),
+          gap: (theme) => theme.spacing(3),
         }}
       >
-        <Typography variant="h4">Register your SolarEdge site here</Typography>
+        <Typography variant="h4">Register your site here</Typography>
+        <Typography
+          variant="h5"
+          sx={{
+            mt: 4,
+          }}
+        >
+          Select your monitoring provider
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+            },
+            gap: (theme) => theme.spacing(4),
+          }}
+        >
+          <MonitoringProvider imgSrc={solarEdge} />
+          <MonitoringProvider disabled imgSrc={enphase} />
+          <MonitoringProvider disabled imgSrc={tesla} />
+          <MonitoringProvider disabled imgSrc={sma} />
+        </Box>
+        <Typography
+          variant="h5"
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            mt: 4,
+          }}
+        >
+          Enter your&nbsp;
+          <Typography
+            variant="h5"
+            sx={{
+              fontStyle: "italic",
+              color: (theme) => theme.palette.primary.main,
+            }}
+          >
+            {selectedSite}
+          </Typography>
+          &nbsp;API credentials
+        </Typography>
         <Controller
           render={({ field }) => (
             <TextField
@@ -49,7 +100,6 @@ export const RegisterSite = () => {
           control={control}
           defaultValue={""}
         />
-
         <Controller
           render={({ field }) => (
             <TextField

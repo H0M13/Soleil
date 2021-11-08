@@ -1,13 +1,15 @@
 import React from "react";
 import {
-  Box,
+  Button,
   Card,
+  CardActions,
   CardContent,
   List,
   ListItem,
   ListItemText,
   Typography,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 
 export const ForSiteOwners = () => {
   return (
@@ -27,6 +29,22 @@ export const ForSiteOwners = () => {
           </ListItem>
         </List>
       </CardContent>
+      <CardActions
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mb: 2
+        }}
+      >
+          <Button
+            variant="contained"
+            disableElevation
+            component={Link}
+            to="/register-site"
+          >
+            Register your site
+          </Button>
+      </CardActions>
     </Card>
   );
 };

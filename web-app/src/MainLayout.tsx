@@ -8,6 +8,7 @@ import {
   ForSiteOwners,
 } from "./features";
 import useBlobity from "blobity/lib/useBlobity";
+import { Routes, Route } from "react-router-dom";
 
 export const MainLayout = () => {
   const options = {
@@ -39,6 +40,10 @@ export const MainLayout = () => {
     shape: {
       borderRadius: 0,
     },
+    typography: {
+      fontFamily: "'Source Code Pro', monospace",
+      fontWeightRegular: 600,
+    },
     components: {
       MuiButton: {
         styleOverrides: {
@@ -57,6 +62,9 @@ export const MainLayout = () => {
         styleOverrides: {
           root: {
             boxShadow: "10px 10px black",
+            backgroundColor: "transparent",
+            border: "1px solid black",
+            color: "rgb(27, 116, 242)",
           },
         },
       },
@@ -92,23 +100,37 @@ export const MainLayout = () => {
             flex: "auto",
           }}
         >
-          <Container>
-            <Box
-              sx={{
-                display: "flex",
-                gap: (theme) => theme.spacing(2),
-                justifyContent: "space-around",
-                my: {
-                  xs: 2,
-                  md: 4,
-                },
-              }}
-            >
-              <ForStakers />
-              <ForSiteOwners />
-            </Box>
-            <SitesDisplay />
-            <RegisterSite />
+          <Container
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: (theme) => theme.spacing(4),
+                      justifyContent: "space-around",
+                      my: {
+                        xs: 2,
+                        md: 4,
+                      },
+                    }}
+                  >
+                    <ForStakers />
+                    <ForSiteOwners />
+                  </Box>
+                }
+              />
+              <Route path="register-site" element={<RegisterSite />} />
+            </Routes>
+            {/* <SitesDisplay /> */}
           </Container>
         </Box>
         <Box
