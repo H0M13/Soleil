@@ -24,7 +24,7 @@ export const ForSiteOwners = () => {
           <ListItem>
             <ListItemText
               primary="Earn cryptocurrency!"
-              secondary="Register with your SolarEdge site and you'll earn cryptocurrency for generating solar power. Keep fighting climate change!"
+              secondary="Register your site on Soleil and you'll earn cryptocurrency for generating solar power. Keep fighting climate change!"
             />
           </ListItem>
         </List>
