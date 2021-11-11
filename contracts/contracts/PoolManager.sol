@@ -20,7 +20,7 @@ contract PoolManager is Ownable, ChainlinkClient {
     mapping(address => uint256) public uniqueTokensStaked;
 
     // Contract config
-    address[] allowedTokens;
+    address[] public allowedTokens;
     address public oracle;
     bytes32 public jobId;
     uint256 private fee;
@@ -46,7 +46,7 @@ contract PoolManager is Ownable, ChainlinkClient {
         allowedTokens.push(token);
     }
 
-    function stakeTokens(uint256 _amount, address token) public {
+    function addTokensToPool(uint256 _amount, address token) public {
         // Require amount greater than 0
         require(_amount > 0, "amount cannot be 0");
         if (tokenIsAllowed(token)) {
@@ -62,7 +62,7 @@ contract PoolManager is Ownable, ChainlinkClient {
     }
 
     function withdrawTokens(address token) public {
-        // Fetch staking balance
+        // Fetch balance
         uint256 balance = stakingBalance[token][msg.sender];
         require(balance > 0, "staking balance cannot be 0");
         IERC20(token).transfer(msg.sender, balance);
