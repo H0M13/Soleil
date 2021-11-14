@@ -2,16 +2,17 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract PoolManager is Ownable, ChainlinkClient {
+contract PoolManager is Ownable {
 
     IERC20 public soleilToken;
 
     // The solar-power-generating sites registered in the dapp
     address[] public solarSites;
+
+    mapping(address => mapping(uint256 => uint256)) public dayToEnergyProduced;
     mapping(address => mapping(address => uint256)) public earnedTokensBalance;
 
     // The users who have staked funds in the dapp
@@ -21,21 +22,9 @@ contract PoolManager is Ownable, ChainlinkClient {
 
     // Contract config
     address[] public allowedTokens;
-    address public oracle;
-    bytes32 public jobId;
-    uint256 private fee;
-
-    // Emitted when Chainlink node pushes energy data to this contract
-    event EnergyDataReceived(bytes32 data);
 
     constructor(address _soleilTokenAddress) public {
         soleilToken = IERC20(_soleilTokenAddress);
-        setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
-        fee = 0.1 * 10 ** 18; // 0.1 LINK
-    }
-
-    function setOracle(address _oracle) public onlyOwner {
-        oracle = _oracle;
     }
 
     function setJobId(bytes32 _jobId) public onlyOwner {
@@ -114,24 +103,5 @@ contract PoolManager is Ownable, ChainlinkClient {
             }
         }
         return totalValue;
-    }
-
-    /// @notice Request today's energy data on all sites from Chainlink node
-    /// @return requestId - ID of Chainlink request
-    function requestEnergyData() public returns (bytes32 requestId) 
-    {
-        Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
-            
-        requestId = sendChainlinkRequestTo(oracle, request, fee);
-
-        return requestId;
-    }
-  
-    /// @notice Callback function to receive response
-    /// @param _requestId - ID of Chainlink request
-    /// @param _data - The resulting energy data in bytes32 format
-    function fulfill(bytes32 _requestId, bytes32 _data) public recordChainlinkFulfillment(_requestId)
-    {
-        emit EnergyDataReceived(_data);
     }
 }
