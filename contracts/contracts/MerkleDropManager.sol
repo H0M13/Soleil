@@ -1,91 +1,207 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import "hardhat/console.sol";
+import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
 
 contract MerkleDropManager is Ownable {
 
-    bytes32 public sllRoot;
-    bytes32 public daiRoot;
+    using SafeMath for uint256;
+    using MerkleProof for bytes32[];
+    
+    mapping(uint256 => bytes32) daiRoots;
+    mapping(uint256 => bytes32) sllRoots;
+    
+    uint256 currentDaiPaymentCycleStartBlock;
+    uint256 currentSllPaymentCycleStartBlock;
+
     IERC20 public sllToken;
     IERC20 public daiToken;
 
     uint public withdrawnDaiTokens;  // The total DAI withdrawn
     uint public withdrawnSllTokens;  // The total SLL withdrawn
 
+    uint256 public daiPaymentCycles = 1;
+    uint256 public sllPaymentCycles = 1;
     mapping (address => uint256) public sllWithdrawn;
     mapping (address => uint256) public daiWithdrawn;
 
-    mapping (address => bytes32) public lastClaimedDaiDropRoot; // The root of the last DAI drop claimed by the address
-    mapping (address => bytes32) public lastClaimedSllDropRoot; // The root of the last SLL drop claimed by the address
-
-    event Withdraw(address recipient, uint value, string ticker);
+    event PaymentCycleEnded(uint256 paymentCycle, uint256 startBlock, uint256 endBlock);
+    event Withdraw(address indexed recipient, uint value, string ticker);
 
     constructor(address _sllTokenAddress, address _daiTokenAddress) public {
         sllToken = IERC20(_sllTokenAddress);
         daiToken = IERC20(_daiTokenAddress);
+        currentDaiPaymentCycleStartBlock = block.number;
+        currentSllPaymentCycleStartBlock = block.number;
     }
 
-    function setSllMerkleRoot(bytes32 _root) public {
-        root = _root;
+    function submitSllMerkleRoot(bytes32 _root) public onlyOwner returns(bool) {
+        sllRoots[numPaymentCycles] = _root;
+
+        startNewSllPaymentCycle();
+
+        return true;
     }
 
-    function setDaiMerkleRoot(bytes32 _root) public {
-        root = _root;
+    function submitDaiMerkleRoot(bytes32 _root) public onlyOwner returns(bool) {
+        daiRoots[numPaymentCycles] = _root;
+
+        startNewDaiPaymentCycle();
+
+        return true;
     }
 
-    function withdrawSll(uint value, bytes32[] memory proof) public {
+    function withdrawSll(uint256 value, bytes32[] memory proof) public {
         require(value != 0, "The withdraw amount must not be zero.");
-        require(verifyEntitled(msg.sender, value, proof), "The proof could not be verified.");
-        require(lastClaimedSllDropRoot[msg.sender] != sllRoot, "You have already withdrawn tokens in the most recent SLL drop.");
-        require(sllToken.balanceOf(address(this)) >= value, "The MerkleDropManager does not have enough SLL to make this withdrawal.");
 
-        lastClaimedSllDropRoot[msg.sender] = root;
+        // Calculate how much SLL the user may withdraw
+        uint256 balance = balanceForProof(proof);
+        require(balance >= value, "The proof could not be verified.");
+
+        sllWithdrawn[msg.sender] = sllWithdrawn[msg.sender].add(value);
+
+        require(sllToken.mint(msg.sender, value));
         sllWithdrawn += value;
-
-        require(sllToken.transfer(msg.sender, value));
         emit Withdraw(msg.sender, value, 'SLL');
     }
 
-    function withdrawDai(uint value, bytes32[] memory proof) public {
+    function withdrawDai(uint256 value, bytes32[] memory proof) public {
         require(value != 0, "The withdraw amount must not be zero.");
-        require(verifyEntitled(msg.sender, value, proof), "The proof could not be verified.");
-        require(lastClaimedDaiDropRoot[msg.sender] != daiRoot, "You have already withdrawn tokens in the most recent DAI drop.");
         require(daiToken.balanceOf(address(this)) >= value, "The MerkleDropManager does not have enough DAI to make this withdrawal.");
 
-        lastClaimedDaiDropRoot[msg.sender] = root;
-        daiWithdrawn += value;
+        // Calculate how much DAI the user may withdraw
+        uint256 balance = balanceForProof(proof);
+        require(balance >= value, "The proof could not be verified.");
+
+        daiWithdrawn[msg.sender] = daiWithdrawn[msg.sender].add(value);
 
         require(daiToken.transfer(msg.sender, value));
+        daiWithdrawn += value;
         emit Withdraw(msg.sender, value, 'DAI');
     }
 
-    function verifyEntitled(address recipient, uint value, bytes32[] memory proof, bool dai) public view returns (bool) {
-        // We need to pack the 20 bytes address to the 32 bytes value
-        // to match with the proof made with the merkle-drop package
-        bytes32 leaf = keccak256(abi.encodePacked(recipient, value));
-        return verifyProof(leaf, proof, dai);
+    function daiBalanceForProof(bytes memory proof) public view returns(uint256) {
+        return daiBalanceForProofWithAddress(msg.sender, proof);
     }
 
-    function verifyProof(bytes32 leaf, bytes32[] memory proof, bool dai) internal view returns (bool) {
-        bytes32 currentHash = leaf;
-
-        for (uint i = 0; i < proof.length; i += 1) {
-            currentHash = parentHash(currentHash, proof[i]);
-        }
-
-        if (dai) {
-            return currentHash == daiRoot;
-        }
-        return currentHash == sllRoot;
+    function sllBalanceForProof(bytes memory proof) public view returns(uint256) {
+        return sllBalanceForProofWithAddress(msg.sender, proof);
     }
 
-    function parentHash(bytes32 a, bytes32 b) internal pure returns (bytes32) {
-        if (a < b) {
-            return keccak256(abi.encode(a, b));
+    function startNewDaiPaymentCycle() internal onlyOwner returns(bool) {
+        require(block.number > currentDaiPaymentCycleStartBlock);
+
+        emit PaymentCycleEnded(numDaiPaymentCycles, currentDaiPaymentCycleStartBlock, block.number);
+
+        numDaiPaymentCycles = numDaiPaymentCycles.add(1);
+        currentDaiPaymentCycleStartBlock = block.number.add(1);
+
+        return true;
+    } 
+
+    function startNewSllPaymentCycle() internal onlyOwner returns(bool) {
+        require(block.number > currentSllPaymentCycleStartBlock);
+
+        emit PaymentCycleEnded(numSllPaymentCycles, currentSllPaymentCycleStartBlock, block.number);
+
+        numSllPaymentCycles = numSllPaymentCycles.add(1);
+        currentSllPaymentCycleStartBlock = block.number.add(1);
+
+        return true;
+    } 
+
+    function submitDaiMerkleRoot(bytes32 _root) public onlyOwner returns(bool) {
+        daiRoots[numPaymentCycles] = _root;
+
+        startNewDaiPaymentCycle();
+
+        return true;
+    }
+
+    function submitSllMerkleRoot(bytes32 _root) public onlyOwner returns(bool) {
+        sllRoots[numPaymentCycles] = _root;
+
+        startNewSllPaymentCycle();
+
+        return true;
+    }
+
+    function daiBalanceForProofWithAddress(address _address, bytes memory proof) public view returns(uint256) {
+        bytes32[] memory meta;
+        bytes32[] memory _proof;
+
+        (meta, _proof) = splitIntoBytes32(proof, 2);
+        if (meta.length != 2) { return 0; }
+
+        uint256 daiPaymentCycleNumber = uint256(meta[0]);
+        uint256 cumulativeAmount = uint256(meta[1]);
+        if (daiRoots[daiPaymentCycleNumber] == 0x0) { return 0; }
+
+        bytes32 leaf = keccak256(
+                                 abi.encodePacked(
+                                                  _address,
+                                                  cumulativeAmount
+                                                  )
+                                 );
+        if (daiWithdrawn[_address] < cumulativeAmount &&
+            _proof.verify(daiRoots[paymentCycleNumber], leaf)) {
+          return cumulativeAmount.sub(daiWithdrawn[_address]);
         } else {
-            return keccak256(abi.encode(b, a));
+          return 0;
+        }
+    }
+
+    function sllBalanceForProofWithAddress(address _address, bytes memory proof) public view returns(uint256) {
+        bytes32[] memory meta;
+        bytes32[] memory _proof;
+
+        (meta, _proof) = splitIntoBytes32(proof, 2);
+        if (meta.length != 2) { return 0; }
+
+        uint256 sllPaymentCycleNumber = uint256(meta[0]);
+        uint256 cumulativeAmount = uint256(meta[1]);
+        if (sllRoots[sllPaymentCycleNumber] == 0x0) { return 0; }
+
+        bytes32 leaf = keccak256(
+                                 abi.encodePacked(
+                                                  _address,
+                                                  cumulativeAmount
+                                                  )
+                                 );
+        if (sllWithdrawn[_address] < cumulativeAmount &&
+            _proof.verify(sllRoots[paymentCycleNumber], leaf)) {
+          return cumulativeAmount.sub(sllWithdrawn[_address]);
+        } else {
+          return 0;
+        }
+    }
+
+    function splitIntoBytes32(bytes memory byteArray, uint256 numBytes32) internal pure returns (bytes32[] memory bytes32Array,
+                                                                                        bytes32[] memory remainder) {
+        if ( byteArray.length % 32 != 0 ||
+             byteArray.length < numBytes32.mul(32) ||
+             byteArray.length.div(32) > 50) { // Arbitrarily limiting this function to an array of 50 bytes32's to conserve gas
+
+          bytes32Array = new bytes32[](0);
+          remainder = new bytes32[](0);
+          return (bytes32Array, remainder);
+        }
+
+        bytes32Array = new bytes32[](numBytes32);
+        remainder = new bytes32[](byteArray.length.sub(64).div(32));
+        bytes32 _bytes32;
+        for (uint256 k = 32; k <= byteArray.length; k = k.add(32)) {
+          assembly {
+            _bytes32 := mload(add(byteArray, k))
+          }
+          if(k <= numBytes32*32){
+            bytes32Array[k.sub(32).div(32)] = _bytes32;
+          } else {
+            remainder[k.sub(96).div(32)] = _bytes32;
+          }
         }
     }
 }
