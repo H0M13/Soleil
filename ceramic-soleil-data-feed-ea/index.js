@@ -119,6 +119,8 @@ const performRequest = async ({ input, callback }) => {
     }
   });
 
+  console.log(JSON.stringify(newContent))
+
   await doc1.update(newContent);
 
   callback(200, Requester.success(jobRunID, {
