@@ -28,14 +28,31 @@ contract MerkleDropManager is Ownable {
     mapping (address => uint256) public sllWithdrawn;
     mapping (address => uint256) public daiWithdrawn;
 
-    event PaymentCycleEnded(uint256 paymentCycle, uint256 startBlock, uint256 endBlock);
+    mapping (uint256 => uint256) public timestampToDaiToDistribute;
+
+    event DaiPaymentCycleEnded(uint256 daiPaymentCycle, uint256 startBlock, uint256 endBlock);
+    event SllPaymentCycleEnded(uint256 sllPaymentCycle, uint256 startBlock, uint256 endBlock);
     event Withdraw(address indexed recipient, uint value, string ticker);
+    event DaiPayoutScheduleSet(uint256 amount, uint256 numOfDays);
 
     constructor(address _sllTokenAddress, address _daiTokenAddress) public {
         sllToken = IERC20(_sllTokenAddress);
         daiToken = IERC20(_daiTokenAddress);
         currentDaiPaymentCycleStartBlock = block.number;
         currentSllPaymentCycleStartBlock = block.number;
+    }
+
+    function setDaiPayoutSchedule(uint256 _amount, uint256 _numOfDays) public returns(bool) {
+        require(_numOfDays <= 100, "100 days maximum schedule length exceeded.");
+        uint256 allowance = daiToken.allowance(msg.sender, address(this));
+        require(allowance >= _amount, "Insufficient DAI token allowance");
+        daiToken.transferFrom(msg.sender, address(this), _amount);
+        uint256 dailyDistribution = _amount.div(_numOfDays);
+        uint256 fullDaysSinceEpoch = block.timestamp.div(86400);
+        for(uint i=0; i < _numOfDays; i++){
+            timestampToDaiToDistribute[fullDaysSinceEpoch.add(i.add(1).mul(1 days))].add(dailyDistribution);
+        }
+        emit DaiPayoutScheduleSet(_amount, _numOfDays);
     }
 
     function submitSllMerkleRoot(bytes32 _root) public onlyOwner returns(bool) {
@@ -94,7 +111,7 @@ contract MerkleDropManager is Ownable {
     function startNewDaiPaymentCycle() internal onlyOwner returns(bool) {
         require(block.number > currentDaiPaymentCycleStartBlock);
 
-        emit PaymentCycleEnded(numDaiPaymentCycles, currentDaiPaymentCycleStartBlock, block.number);
+        emit DaiPaymentCycleEnded(numDaiPaymentCycles, currentDaiPaymentCycleStartBlock, block.number);
 
         numDaiPaymentCycles = numDaiPaymentCycles.add(1);
         currentDaiPaymentCycleStartBlock = block.number.add(1);
@@ -105,7 +122,7 @@ contract MerkleDropManager is Ownable {
     function startNewSllPaymentCycle() internal onlyOwner returns(bool) {
         require(block.number > currentSllPaymentCycleStartBlock);
 
-        emit PaymentCycleEnded(numSllPaymentCycles, currentSllPaymentCycleStartBlock, block.number);
+        emit SllPaymentCycleEnded(numSllPaymentCycles, currentSllPaymentCycleStartBlock, block.number);
 
         numSllPaymentCycles = numSllPaymentCycles.add(1);
         currentSllPaymentCycleStartBlock = block.number.add(1);
