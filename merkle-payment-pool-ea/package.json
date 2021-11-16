@@ -5,7 +5,6 @@
   "description": "",
   "license": "MIT",
   "scripts": {
-    "bootstrap": "node ./bootstrap.js",
     "test": "./node_modules/.bin/_mocha --timeout 0",
     "start": "node app.js"
   },

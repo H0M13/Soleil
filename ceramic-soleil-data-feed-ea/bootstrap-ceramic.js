@@ -17,10 +17,6 @@ const energyDataSchema = {
     sites: {
       type: "array",
       items: { $ref: "#/$defs/site" },
-    },
-    earningsStreams: {
-      type: "array",
-      items: { $ref: "#/$defs/earningsStream" },
     }
   },
   $defs: {
@@ -48,18 +44,6 @@ const energyDataSchema = {
         },
       },
       required: ["date", "energyProduced"],
-    },
-    earningsStream: {
-      type: "object",
-      properties: {
-        date: {
-          type: "string",
-        },
-        streamId: {
-          type: "string",
-        },
-      },
-      required: ["date", "streamId"],
     }
   },
 };
@@ -127,8 +111,7 @@ async function run() {
   const energyDataDoc = await TileDocument.create(
     ceramic,
     {
-      sites: [],
-      earningsStreams: []
+      sites: []
     },
     {
       controllers: [ceramic.did.id],
@@ -183,6 +166,8 @@ async function run() {
       },
     },
   };
+  await writeFile("../web-app/config.json", JSON.stringify(config));
+  await writeFile("../merkle-payment-pool-ea/config.json", JSON.stringify(config));
   await writeFile("./config.json", JSON.stringify(config));
 
   console.log("Config written to config.json file:", config);
