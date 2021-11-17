@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 
-export const ForStakers = () => {
+const ForStakers = () => {
   return (
     <Card
       sx={{
@@ -36,3 +36,5 @@ export const ForStakers = () => {
     </Card>
   );
 };
+
+export default ForStakers;

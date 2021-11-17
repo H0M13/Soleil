@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { MainLayout } from "./MainLayout";
+import { MainLayout } from "./features/mainLayout/MainLayout";
 import { SoleilProvider } from "./context/SoleilContext";
 import { BrowserRouter as Router } from "react-router-dom";
 

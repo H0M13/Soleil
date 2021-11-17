@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 
-export const ForSiteOwners = () => {
+const ForSiteOwners = () => {
   return (
     <Card
       sx={{
@@ -48,3 +48,5 @@ export const ForSiteOwners = () => {
     </Card>
   );
 };
+
+export default ForSiteOwners;

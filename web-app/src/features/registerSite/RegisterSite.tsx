@@ -1,12 +1,12 @@
-import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { useMoralis } from "react-moralis";
 import { MonitoringProvider } from "./MonitoringProvider";
-import enphase from "./enphase.png";
-import tesla from "./tesla.png";
-import solarEdge from "./solarEdge.png";
-import sma from "./sma.png";
+
+import enphase from "../../resources/images/enphase.png";
+import tesla from "../../resources/images/tesla.png";
+import solarEdge from "../../resources/images/solarEdge.png";
+import sma from "../../resources/images/sma.png";
 
 export const RegisterSite = () => {
   //  TODO: Either only allow registering a site when connected or add a wallet field to form
