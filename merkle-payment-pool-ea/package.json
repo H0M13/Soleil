@@ -1,5 +1,5 @@
 {
-  "name": "SolarEdge-EA",
+  "name": "CeramicSoleilDataFeed-EA",
   "version": "0.1.0",
   "author": "",
   "description": "",
@@ -9,8 +9,20 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "@3id/connect": "^0.2.5",
+    "@ceramicnetwork/http-client": "^1.4.4",
+    "@ceramicnetwork/stream-tile": "^1.4.1",
     "@chainlink/external-adapter": "^0.2.6",
-    "dotenv": "^8.2.0"
+    "axios": "^0.24.0",
+    "date-fns": "^2.25.0",
+    "dids": "^2.4.0",
+    "dotenv": "^8.2.0",
+    "ethereumjs-util": "^7.1.3",
+    "key-did-provider-ed25519": "^1.1.0",
+    "key-did-resolver": "^1.4.0",
+    "lodash": "^4.17.21",
+    "uint8arrays": "^3.0.0",
+    "web3-utils": "^1.6.1"
   },
   "devDependencies": {
     "body-parser": "^1.19.0",
