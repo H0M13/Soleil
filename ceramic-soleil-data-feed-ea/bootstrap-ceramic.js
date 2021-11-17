@@ -99,12 +99,18 @@ async function run() {
   const deployedEnergyDataSchema = await TileDocument.create(
     ceramic,
     energyDataSchema,
-    metadata
+    metadata,
+    {
+      pin: true
+    }
   );
   const deployedCumulativeEarningsDataSchema = await TileDocument.create(
     ceramic,
     cumulativeEarningsDataSchema,
-    metadata
+    metadata,
+    {
+      pin: true
+    }
   );
 
   // Create TileDocuments
@@ -116,6 +122,9 @@ async function run() {
     {
       controllers: [ceramic.did.id],
       schema: deployedEnergyDataSchema.commitId.toString(),
+    },
+    {
+      pin: true
     }
   );
   const daiEarningsDoc = await TileDocument.create(
@@ -126,6 +135,9 @@ async function run() {
     {
       controllers: [ceramic.did.id],
       schema: deployedCumulativeEarningsDataSchema.commitId.toString(),
+    },
+    {
+      pin: true
     }
   );
   const sllEarningsDoc = await TileDocument.create(
@@ -136,6 +148,9 @@ async function run() {
     {
       controllers: [ceramic.did.id],
       schema: deployedCumulativeEarningsDataSchema.commitId.toString(),
+    },
+    {
+      pin: true
     }
   );
 
@@ -166,7 +181,7 @@ async function run() {
       },
     },
   };
-  await writeFile("../web-app/config.json", JSON.stringify(config));
+  await writeFile("../web-app/src/config.json", JSON.stringify(config));
   await writeFile("../merkle-payment-pool-ea/config.json", JSON.stringify(config));
   await writeFile("./config.json", JSON.stringify(config));
 
