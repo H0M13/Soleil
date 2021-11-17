@@ -6,7 +6,7 @@ import { SubmitFunds } from "../features/submitFunds";
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Landing />} />
-    <Route path="donate-funds" element={<SubmitFunds />} />
+    <Route path="submit-funds" element={<SubmitFunds />} />
     <Route path="register-site" element={<RegisterSite />} />
   </Routes>
 )

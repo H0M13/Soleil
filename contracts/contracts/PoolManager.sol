@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
 import './SoleilToken.sol';
 
-contract MerkleDropManager is Ownable {
+contract PoolManager is Ownable {
 
     using SafeMath for uint256;
     using MerkleProof for bytes32[];
@@ -89,7 +89,7 @@ contract MerkleDropManager is Ownable {
 
     function withdrawDai(uint256 _value, bytes memory _proof) public {
         require(_value != 0, "The withdraw amount must not be zero.");
-        require(daiToken.balanceOf(address(this)) >= _value, "The MerkleDropManager does not have enough DAI to make this withdrawal.");
+        require(daiToken.balanceOf(address(this)) >= _value, "The PoolManager does not have enough DAI to make this withdrawal.");
 
         // Calculate how much DAI the user may withdraw
         uint256 balance = daiBalanceForProof(_proof);

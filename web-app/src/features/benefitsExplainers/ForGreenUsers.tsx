@@ -24,7 +24,7 @@ const ForGreenUsers = () => {
           <ListItem>
             <ListItemText
               primary="Fight climate change with a single transaction."
-              secondary="Choose the amount of DAI you would like to donate and the number of days you would like it to be paid out over.
+              secondary="Choose the amount of DAI you would like to submit and the number of days you would like it to distributed out over.
               Your funds will act as rewards for new and existing solar panel owners for producing green energy.
               Help the fight against climate change by incentivising growth in the entire solar industry."
             />
@@ -50,9 +50,9 @@ const ForGreenUsers = () => {
           variant="contained"
           disableElevation
           component={Link}
-          to="/donate-funds"
+          to="/submit-funds"
         >
-          Donate DAI
+          Submit DAI
         </Button>
       </CardActions>
     </Card>

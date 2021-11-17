@@ -62,7 +62,7 @@ export const SubmitFunds = () => {
             mt: 4,
           }}
         >
-          Over how many days would you like it to be paid out? This may affect the total amount of SLL rewarded to you.
+          Over how many days would you like it to be distributed out? This may affect the total amount of SLL rewarded to you.
         </Typography>
         <Controller
           render={({ field }) => (
