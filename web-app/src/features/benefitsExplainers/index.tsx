@@ -1,5 +1,5 @@
 import ForSiteOwners from "./ForSiteOwners";
-import ForStakers from "./ForStakers";
+import ForGreenUsers from "./ForGreenUsers";
 import { Box } from "@mui/material";
 
 const Landing = () => {
@@ -16,7 +16,7 @@ const Landing = () => {
         },
       }}
     >
-      <ForStakers />
+      <ForGreenUsers />
       <ForSiteOwners />
     </Box>
 	);

@@ -24,7 +24,7 @@ const ForSiteOwners = () => {
           <ListItem>
             <ListItemText
               primary="Earn cryptocurrency!"
-              secondary="Register your site on Soleil and you'll earn cryptocurrency for generating solar power. Keep fighting climate change!"
+              secondary="Register your site on Soleil and you'll earn cryptocurrency for generating solar power. No catch. Use the funds to keep fighting climate change!"
             />
           </ListItem>
         </List>
@@ -33,17 +33,17 @@ const ForSiteOwners = () => {
         sx={{
           display: "flex",
           justifyContent: "center",
-          mb: 2
+          mb: 2,
         }}
       >
-          <Button
-            variant="contained"
-            disableElevation
-            component={Link}
-            to="/register-site"
-          >
-            Register your site
-          </Button>
+        <Button
+          variant="contained"
+          disableElevation
+          component={Link}
+          to="/register-site"
+        >
+          Register your site
+        </Button>
       </CardActions>
     </Card>
   );
