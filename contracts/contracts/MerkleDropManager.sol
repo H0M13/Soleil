@@ -5,6 +5,7 @@ import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
+import './SoleilToken.sol';
 
 contract MerkleDropManager is Ownable {
 
@@ -17,14 +18,14 @@ contract MerkleDropManager is Ownable {
     uint256 currentDaiPaymentCycleStartBlock;
     uint256 currentSllPaymentCycleStartBlock;
 
-    IERC20 public sllToken;
+    SoleilToken public sllToken;
     IERC20 public daiToken;
 
     uint public withdrawnDaiTokens;  // The total DAI withdrawn
     uint public withdrawnSllTokens;  // The total SLL withdrawn
 
-    uint256 public daiPaymentCycles = 1;
-    uint256 public sllPaymentCycles = 1;
+    uint256 public numDaiPaymentCycles = 1;
+    uint256 public numSllPaymentCycles = 1;
     mapping (address => uint256) public sllWithdrawn;
     mapping (address => uint256) public daiWithdrawn;
 
@@ -35,8 +36,8 @@ contract MerkleDropManager is Ownable {
     event Withdraw(address indexed recipient, uint value, string ticker);
     event DaiPayoutScheduleSet(uint256 amount, uint256 numOfDays);
 
-    constructor(address _sllTokenAddress, address _daiTokenAddress) public {
-        sllToken = IERC20(_sllTokenAddress);
+    constructor(address _sllTokenAddress, address _daiTokenAddress) {
+        sllToken = SoleilToken(_sllTokenAddress);
         daiToken = IERC20(_daiTokenAddress);
         currentDaiPaymentCycleStartBlock = block.number;
         currentSllPaymentCycleStartBlock = block.number;
@@ -53,10 +54,11 @@ contract MerkleDropManager is Ownable {
             timestampToDaiToDistribute[fullDaysSinceEpoch.add(i.add(1).mul(1 days))].add(dailyDistribution);
         }
         emit DaiPayoutScheduleSet(_amount, _numOfDays);
+        return true;
     }
 
     function submitSllMerkleRoot(bytes32 _root) public onlyOwner returns(bool) {
-        sllRoots[numPaymentCycles] = _root;
+        sllRoots[numSllPaymentCycles] = _root;
 
         startNewSllPaymentCycle();
 
@@ -64,48 +66,48 @@ contract MerkleDropManager is Ownable {
     }
 
     function submitDaiMerkleRoot(bytes32 _root) public onlyOwner returns(bool) {
-        daiRoots[numPaymentCycles] = _root;
+        daiRoots[numDaiPaymentCycles] = _root;
 
         startNewDaiPaymentCycle();
 
         return true;
     }
 
-    function withdrawSll(uint256 value, bytes32[] memory proof) public {
-        require(value != 0, "The withdraw amount must not be zero.");
+    function withdrawSll(uint256 _value, bytes memory _proof) public {
+        require(_value != 0, "The withdraw amount must not be zero.");
 
         // Calculate how much SLL the user may withdraw
-        uint256 balance = balanceForProof(proof);
-        require(balance >= value, "The proof could not be verified.");
+        uint256 balance = sllBalanceForProof(_proof);
+        require(balance >= _value, "The proof could not be verified.");
 
-        sllWithdrawn[msg.sender] = sllWithdrawn[msg.sender].add(value);
+        sllWithdrawn[msg.sender] = sllWithdrawn[msg.sender].add(_value);
 
-        require(sllToken.mint(msg.sender, value));
-        sllWithdrawn += value;
-        emit Withdraw(msg.sender, value, 'SLL');
+        sllToken.mint(msg.sender, _value);
+        withdrawnSllTokens += _value;
+        emit Withdraw(msg.sender, _value, 'SLL');
     }
 
-    function withdrawDai(uint256 value, bytes32[] memory proof) public {
-        require(value != 0, "The withdraw amount must not be zero.");
-        require(daiToken.balanceOf(address(this)) >= value, "The MerkleDropManager does not have enough DAI to make this withdrawal.");
+    function withdrawDai(uint256 _value, bytes memory _proof) public {
+        require(_value != 0, "The withdraw amount must not be zero.");
+        require(daiToken.balanceOf(address(this)) >= _value, "The MerkleDropManager does not have enough DAI to make this withdrawal.");
 
         // Calculate how much DAI the user may withdraw
-        uint256 balance = balanceForProof(proof);
-        require(balance >= value, "The proof could not be verified.");
+        uint256 balance = daiBalanceForProof(_proof);
+        require(balance >= _value, "The proof could not be verified.");
 
-        daiWithdrawn[msg.sender] = daiWithdrawn[msg.sender].add(value);
+        daiWithdrawn[msg.sender] = daiWithdrawn[msg.sender].add(_value);
 
-        require(daiToken.transfer(msg.sender, value));
-        daiWithdrawn += value;
-        emit Withdraw(msg.sender, value, 'DAI');
+        require(daiToken.transfer(msg.sender, _value));
+        withdrawnDaiTokens += _value;
+        emit Withdraw(msg.sender, _value, 'DAI');
     }
 
-    function daiBalanceForProof(bytes memory proof) public view returns(uint256) {
-        return daiBalanceForProofWithAddress(msg.sender, proof);
+    function daiBalanceForProof(bytes memory _proof) public view returns(uint256) {
+        return daiBalanceForProofWithAddress(msg.sender, _proof);
     }
 
-    function sllBalanceForProof(bytes memory proof) public view returns(uint256) {
-        return sllBalanceForProofWithAddress(msg.sender, proof);
+    function sllBalanceForProof(bytes memory _proof) public view returns(uint256) {
+        return sllBalanceForProofWithAddress(msg.sender, _proof);
     }
 
     function startNewDaiPaymentCycle() internal onlyOwner returns(bool) {
@@ -130,22 +132,6 @@ contract MerkleDropManager is Ownable {
         return true;
     } 
 
-    function submitDaiMerkleRoot(bytes32 _root) public onlyOwner returns(bool) {
-        daiRoots[numPaymentCycles] = _root;
-
-        startNewDaiPaymentCycle();
-
-        return true;
-    }
-
-    function submitSllMerkleRoot(bytes32 _root) public onlyOwner returns(bool) {
-        sllRoots[numPaymentCycles] = _root;
-
-        startNewSllPaymentCycle();
-
-        return true;
-    }
-
     function daiBalanceForProofWithAddress(address _address, bytes memory proof) public view returns(uint256) {
         bytes32[] memory meta;
         bytes32[] memory _proof;
@@ -164,7 +150,7 @@ contract MerkleDropManager is Ownable {
                                                   )
                                  );
         if (daiWithdrawn[_address] < cumulativeAmount &&
-            _proof.verify(daiRoots[paymentCycleNumber], leaf)) {
+            _proof.verify(daiRoots[daiPaymentCycleNumber], leaf)) {
           return cumulativeAmount.sub(daiWithdrawn[_address]);
         } else {
           return 0;
@@ -189,7 +175,7 @@ contract MerkleDropManager is Ownable {
                                                   )
                                  );
         if (sllWithdrawn[_address] < cumulativeAmount &&
-            _proof.verify(sllRoots[paymentCycleNumber], leaf)) {
+            _proof.verify(sllRoots[sllPaymentCycleNumber], leaf)) {
           return cumulativeAmount.sub(sllWithdrawn[_address]);
         } else {
           return 0;
