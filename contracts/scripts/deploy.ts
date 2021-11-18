@@ -13,13 +13,25 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  // We get the contract to deploy
-  const PoolManager = await ethers.getContractFactory("PoolManager");
-  const poolManager = await PoolManager.deploy("");
+  // DAI on Rinkeby
+  const DAI_ADDRESS = "0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea";
 
-  await poolManager.deployed();
+  const soleilTokenFactory = await ethers.getContractFactory("SoleilToken");
+  const soleilTokenContract = await soleilTokenFactory.deploy();
 
-  console.log("Soleil Pool Manager deployed to:", poolManager.address);
+  await soleilTokenContract.deployed();
+  
+  console.log("Soleil Token contract deployed to:", soleilTokenContract.address);
+
+  const poolManagerFactory = await ethers.getContractFactory("PoolManager");
+  const poolManagerContract = await poolManagerFactory.deploy(
+    soleilTokenContract.address,
+    DAI_ADDRESS
+  );
+
+  await poolManagerContract.deployed();
+
+  console.log("Soleil Pool Manager contract deployed to:", poolManagerContract.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

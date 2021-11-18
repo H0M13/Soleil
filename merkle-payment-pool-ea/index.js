@@ -10,12 +10,28 @@ const formatISO = require("date-fns/formatISO");
 const axios = require("axios").default;
 const { parseISO, differenceInDays, addDays } = require("date-fns");
 const CumulativePaymentTree = require("./cumulative-payment-tree.js");
+const poolManagerContract = require("./poolManagerContract.json");
+const { ethers } = require("ethers");
 
 const createRequest = async (input, callback) => {
   return performRequest({
     input,
     callback,
   });
+};
+
+const connectToContract = () => {
+  const { address, abi } = poolManagerContract;
+  console.log(address);
+  console.log(abi);
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+  return new ethers.Contract(address, abi, provider);
+};
+
+const getDaiPayoutForDayWithTimestamp = async ({ timestamp, contract }) => {
+  const result = await contract.timestampToDaiToDistribute(123)
+  console.log(result)
+  return result
 };
 
 const performRequest = async ({ input, callback }) => {
@@ -48,6 +64,11 @@ const performRequest = async ({ input, callback }) => {
 
   // TODO - Get real value from smart contract
   const dailyDaiReward = 1230;
+  const contract = connectToContract();
+  const result = await getDaiPayoutForDayWithTimestamp({
+    timestamp: 123,
+    contract,
+  });
 
   const contractStartDateIso = process.env.START_DATE_ISO;
 
@@ -118,7 +139,7 @@ const performRequest = async ({ input, callback }) => {
   const daiEarningsDoc = await ceramic.loadStream(
     cumulativeDaiEarningsStreamId
   );
-  await daiEarningsDoc.update(toWriteToCeramic);
+  // await daiEarningsDoc.update(toWriteToCeramic);
 
   // Generate merkle root for earnings
   let paymentTree = new CumulativePaymentTree(
