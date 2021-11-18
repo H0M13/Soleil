@@ -50,8 +50,10 @@ contract PoolManager is Ownable {
         daiToken.transferFrom(msg.sender, address(this), _amount);
         uint256 dailyDistribution = _amount.div(_numOfDays);
         uint256 fullDaysSinceEpoch = block.timestamp.div(86400);
+        uint256 timestamp = 0;
         for(uint i=0; i < _numOfDays; i++){
-            timestampToDaiToDistribute[fullDaysSinceEpoch.add(i.add(1).mul(1 days))].add(dailyDistribution);
+          timestamp = fullDaysSinceEpoch.add(i.add(1)).mul(1 days);
+            timestampToDaiToDistribute[timestamp] = timestampToDaiToDistribute[timestamp].add(dailyDistribution);
         }
         emit DaiPayoutScheduleSet(_amount, _numOfDays);
         return true;

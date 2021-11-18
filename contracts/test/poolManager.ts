@@ -58,7 +58,10 @@ describe("PoolManager", () => {
     ).to.equal(true);
   });
 
-  it("Should be able to set DAI payout schedule", async () => {
+  it("Should be able to set DAI payout schedule correctly", async () => {
+    const amountOfDaiToSubmit = "1500";
+    const numDays = 100;
+
     // Manipulate DAI balance locally through storage slots
     const Dai = new ethers.Contract(DAI_ADDRESS, erc20.abi, ethers.provider);
     const locallyManipulatedBalance = ethers.utils.parseUnits("100000");
@@ -81,16 +84,38 @@ describe("PoolManager", () => {
       ethers.utils.parseUnits("100000")
     );
 
-    await Dai.connect(address1).approve(poolManagerContract.address, ethers.utils.parseUnits("1500"));
+    // Approve the pool manager contract to transfer 1500 of those DAI
+    await Dai.connect(address1).approve(
+      poolManagerContract.address,
+      ethers.utils.parseUnits(amountOfDaiToSubmit)
+    );
 
+    // Use the DAI to set a payout schedule of 1500 DAI over 100 days
     await expect(
-      poolManagerContract.connect(address1).setDaiPayoutSchedule(
-        ethers.utils.parseUnits("1500"),
-        100
-      )
+      poolManagerContract
+        .connect(address1)
+        .setDaiPayoutSchedule(
+          ethers.utils.parseUnits(amountOfDaiToSubmit),
+          numDays
+        )
     )
       .to.emit(poolManagerContract, "DaiPayoutScheduleSet")
-      .withArgs(ethers.utils.parseUnits("1500"), 100);
+      .withArgs(ethers.utils.parseUnits(amountOfDaiToSubmit), numDays);
+
+    // Check that the timestampToDaiToDistribute mapping is set correctly.
+    // => 15 DAI per day for the next 100 days.
+    const secondsSinceEpoch = Math.round(new Date().getTime() / 1000);
+    const secondsInDay = 86400;
+    const fullDaysSinceEpoch = Math.floor(
+      secondsSinceEpoch / secondsInDay
+    );
+    for (let i = 0; i < numDays; i++) {
+      expect(
+        await poolManagerContract.timestampToDaiToDistribute(
+          (fullDaysSinceEpoch + i + 1) * secondsInDay
+        )
+      ).to.equal(ethers.utils.parseUnits("15"));
+    }
   });
 
   const toBytes32 = (bn: any) => {
