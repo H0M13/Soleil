@@ -1,5 +1,5 @@
 {
-  "address": "0xEd0310a1C0aeB14A961cFD6fD77372A8ae0f4341",
+  "address": "0xa21820ad03F7bd403e038a8cDE6678d6277eD2db",
   "abi": [
     {
       "inputs": [
@@ -11,6 +11,11 @@
         {
           "internalType": "address",
           "name": "_daiTokenAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_chainlinkNodeAddress",
           "type": "address"
         }
       ],
@@ -149,6 +154,19 @@
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "chainlinkNodeAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
         }
       ],
       "stateMutability": "view",

@@ -21,6 +21,8 @@ contract PoolManager is Ownable {
     SoleilToken public sllToken;
     IERC20 public daiToken;
 
+    address public chainlinkNodeAddress;
+
     uint public withdrawnDaiTokens;  // The total DAI withdrawn
     uint public withdrawnSllTokens;  // The total SLL withdrawn
 
@@ -37,9 +39,10 @@ contract PoolManager is Ownable {
     event Withdraw(address indexed recipient, uint value, string ticker);
     event DaiPayoutScheduleSet(uint256 amount, uint256 numOfDays);
 
-    constructor(address _sllTokenAddress, address _daiTokenAddress) {
+    constructor(address _sllTokenAddress, address _daiTokenAddress, address _chainlinkNodeAddress) {
         sllToken = SoleilToken(_sllTokenAddress);
         daiToken = IERC20(_daiTokenAddress);
+        chainlinkNodeAddress = _chainlinkNodeAddress;
         currentDaiPaymentCycleStartBlock = block.number;
         currentSllPaymentCycleStartBlock = block.number;
     }
@@ -61,7 +64,12 @@ contract PoolManager is Ownable {
         return true;
     }
 
-    function submitSllMerkleRoot(bytes32 _root) public onlyOwner returns(bool) {
+    modifier onlyChainlinkNode() {
+        require(chainlinkNodeAddress == msg.sender,'Only Chainlink node can call this function');
+        _;
+    }
+
+    function submitSllMerkleRoot(bytes32 _root) public onlyChainlinkNode returns(bool) {
         sllRoots[numSllPaymentCycles] = _root;
 
         startNewSllPaymentCycle();
@@ -69,7 +77,7 @@ contract PoolManager is Ownable {
         return true;
     }
 
-    function submitDaiMerkleRoot(bytes32 _root) public onlyOwner returns(bool) {
+    function submitDaiMerkleRoot(bytes32 _root) public onlyChainlinkNode returns(bool) {
         daiRoots[numDaiPaymentCycles] = _root;
 
         startNewDaiPaymentCycle();

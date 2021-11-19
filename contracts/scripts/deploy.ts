@@ -26,7 +26,8 @@ async function main() {
   const poolManagerFactory = await ethers.getContractFactory("PoolManager");
   const poolManagerContract = await poolManagerFactory.deploy(
     soleilTokenContract.address,
-    DAI_ADDRESS
+    DAI_ADDRESS,
+    process.env.CHAINLINK_NODE_ADDRESS || ""
   );
 
   await poolManagerContract.deployed();
