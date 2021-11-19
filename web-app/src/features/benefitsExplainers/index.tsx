@@ -1,6 +1,6 @@
 import ForSiteOwners from "./ForSiteOwners";
 import ForGreenUsers from "./ForGreenUsers";
-import { Box } from "@mui/material";
+import { Box, Theme } from "@mui/material";
 
 const Landing = () => {
   return (
@@ -8,7 +8,7 @@ const Landing = () => {
       sx={{
         display: "flex",
         flexWrap: "wrap",
-        gap: (theme) => theme.spacing(4),
+        gap: (theme: Theme) => theme.spacing(4),
         justifyContent: "space-around",
         my: {
           xs: 2,

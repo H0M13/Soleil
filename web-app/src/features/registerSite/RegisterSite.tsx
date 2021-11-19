@@ -1,5 +1,5 @@
 import { useForm, Controller } from "react-hook-form";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography, Theme } from "@mui/material";
 import { useMoralis } from "react-moralis";
 import { MonitoringProvider } from "./MonitoringProvider";
 
@@ -41,7 +41,7 @@ export const RegisterSite = () => {
           flexDirection: "column",
           alignItems: "center",
           maxWidth: "600px",
-          gap: (theme) => theme.spacing(3),
+          gap: (theme: Theme) => theme.spacing(3),
         }}
       >
         <Typography variant="h4">Register your site here</Typography>
@@ -60,7 +60,7 @@ export const RegisterSite = () => {
               xs: "1fr",
               sm: "1fr 1fr",
             },
-            gap: (theme) => theme.spacing(4),
+            gap: (theme: Theme) => theme.spacing(4),
           }}
         >
           <MonitoringProvider imgSrc={solarEdge} />
@@ -81,7 +81,7 @@ export const RegisterSite = () => {
             variant="h5"
             sx={{
               fontStyle: "italic",
-              color: (theme) => theme.palette.primary.main,
+              color: (theme: Theme) => theme.palette.primary.main,
             }}
           >
             {selectedSite}

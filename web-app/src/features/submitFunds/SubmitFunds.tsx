@@ -1,5 +1,5 @@
 import { useForm, Controller } from "react-hook-form";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography, Theme } from "@mui/material";
 import { useMoralis } from "react-moralis";
 
 export const SubmitFunds = () => {
@@ -28,7 +28,7 @@ export const SubmitFunds = () => {
           flexDirection: "column",
           alignItems: "center",
           maxWidth: "600px",
-          gap: (theme) => theme.spacing(3),
+          gap: (theme: Theme) => theme.spacing(3),
         }}
       >
         <Typography

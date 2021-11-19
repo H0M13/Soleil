@@ -1,16 +1,30 @@
 import React from "react";
-import { Button } from "@mui/material";
+import { Button, Box, Theme, Typography } from "@mui/material";
 import { useMoralis } from "react-moralis";
+import PersonIcon from "@mui/icons-material/Person";
 
 export const AuthManager = () => {
-  const { authenticate, isAuthenticated, isAuthenticating, logout } =
+  const { authenticate, isAuthenticated, isAuthenticating, logout, user } =
     useMoralis();
 
   if (isAuthenticated) {
     return (
-      <Button variant="contained" disableElevation onClick={logout}>
-        Logout
-      </Button>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: (theme: Theme) => theme.spacing(2),
+        }}
+      >
+        <PersonIcon />
+        <Typography>{`${user?.attributes.ethAddress.slice(
+          0,
+          8
+        )}...`}</Typography>
+        <Button variant="contained" disableElevation onClick={logout}>
+          Logout
+        </Button>
+      </Box>
     );
   }
 
