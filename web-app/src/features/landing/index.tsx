@@ -1,6 +1,7 @@
 import ForSiteOwners from "./ForSiteOwners";
 import ForGreenUsers from "./ForGreenUsers";
-import { DaiBalance } from "./daiBalance";
+import { DaiBalance } from "./DaiBalance";
+import { UsersScheduledDaiPayouts } from "./UsersScheduledDaiPayouts";
 
 import { Box, Theme } from "@mui/material";
 
@@ -8,6 +9,7 @@ const Landing = () => {
   return (
     <>
       <DaiBalance />
+      <UsersScheduledDaiPayouts />
       <Box
         sx={{
           display: "flex",

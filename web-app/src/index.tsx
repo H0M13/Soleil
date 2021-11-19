@@ -4,15 +4,29 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { MoralisProvider } from "react-moralis";
+import {
+  ChainId,
+  DAppProvider,
+  Config,
+} from "@usedapp/core";
+
+const config: Config = {
+  readOnlyChainId: ChainId.Rinkeby,
+  readOnlyUrls: {
+    [ChainId.Rinkeby]: process.env.REACT_APP_RPC_URL || "",
+  },
+};
 
 ReactDOM.render(
   <React.StrictMode>
-    <MoralisProvider
-      appId={process.env.REACT_APP_MORALIS_APPLICATION_ID || ""}
-      serverUrl={process.env.REACT_APP_MORALIS_SERVER_URL || ""}
-    >
-      <App />
-    </MoralisProvider>
+    <DAppProvider config={config}>
+      <MoralisProvider
+        appId={process.env.REACT_APP_MORALIS_APPLICATION_ID || ""}
+        serverUrl={process.env.REACT_APP_MORALIS_SERVER_URL || ""}
+      >
+        <App />
+      </MoralisProvider>
+    </DAppProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
