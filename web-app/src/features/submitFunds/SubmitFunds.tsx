@@ -1,8 +1,19 @@
 import { useForm, Controller } from "react-hook-form";
 import { Box, Button, TextField, Typography, Theme } from "@mui/material";
-import { useMoralis } from "react-moralis";
+import { ethers } from "ethers";
+import { useSoleil } from "../../context/SoleilContext";
 
 export const SubmitFunds = () => {
+  const {
+    poolManagerContractAddress,
+    useExecuteSoleilFunction,
+    useExecuteDaiFunction,
+  } = useSoleil();
+
+  // { data, error, fetch, isFetching, isLoading }
+  const executeSoleilFunctionVariables = useExecuteSoleilFunction();
+  const executeDaiFunctionVariables = useExecuteDaiFunction();
+
   //  TODO: Either only allow donating when connected or add a wallet field to form
 
   const { handleSubmit, control, reset, formState } = useForm({
@@ -17,7 +28,30 @@ export const SubmitFunds = () => {
   const onSubmit = async (data: any) => {
     const { amount, numDays } = data;
 
-    console.log(data);
+    const asSolidityNum = ethers.utils.parseUnits(amount.toString());
+
+    console.log(asSolidityNum);
+    console.log(numDays);
+
+    const daiResult = await executeDaiFunctionVariables.fetch({
+      functionName: "approve",
+      params: {
+        _spender: poolManagerContractAddress,
+        _value: asSolidityNum,
+      },
+    });
+
+    console.log(daiResult);
+
+    const soleilResult = await executeSoleilFunctionVariables.fetch({
+      functionName: "setDaiPayoutSchedule",
+      params: {
+        _amount: asSolidityNum,
+        _numOfDays: numDays,
+      },
+    });
+
+    console.log(soleilResult);
   };
 
   return (
@@ -62,7 +96,8 @@ export const SubmitFunds = () => {
             mt: 4,
           }}
         >
-          Over how many days would you like it to be distributed out? This may affect the total amount of SLL rewarded to you.
+          Over how many days would you like it to be distributed out? This may
+          affect the total amount of SLL rewarded to you.
         </Typography>
         <Controller
           render={({ field }) => (

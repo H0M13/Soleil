@@ -1,11 +1,34 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useMoralis } from "react-moralis";
-import contractJson from "./soleilContract.json";
+import {
+  useMoralis,
+  useWeb3ExecuteFunction,
+  Web3ExecuteFunctionParameters,
+} from "react-moralis";
+import poolManagerContractJson from "./soleilContract.json";
+import daiContractJson from "./daiContract.json";
 import { AbiItem } from "web3-utils";
 import { Contract } from "web3-eth-contract";
 
 interface SoleilContextValue {
   contract?: Contract;
+  poolManagerContractAddress: string;
+  daiContractAddress: string;
+  useExecuteSoleilFunction: () => {
+    fetch: (props: RequiredFetchProps) => Promise<any>;
+    isFetching: boolean;
+    isLoading: boolean;
+    error: Error | null;
+    data: unknown;
+    setData: import("use-immer").Updater<unknown>;
+  };
+  useExecuteDaiFunction: () => {
+    fetch: (props: RequiredFetchProps) => Promise<any>;
+    isFetching: boolean;
+    isLoading: boolean;
+    error: Error | null;
+    data: unknown;
+    setData: import("use-immer").Updater<unknown>;
+  };
 }
 
 const SoleilContext = createContext<SoleilContextValue | undefined>(undefined);
@@ -13,6 +36,47 @@ const SoleilContext = createContext<SoleilContextValue | undefined>(undefined);
 interface SoleilProviderProps {
   children: React.ReactNode;
 }
+
+type RequiredFetchProps = {
+  functionName: string;
+  params: Record<string, unknown>;
+};
+
+const useExecuteSoleilFunction = () => {
+  const { fetch: rawFetch, ...rest } = useWeb3ExecuteFunction();
+
+  return {
+    fetch: ({ functionName, params }: RequiredFetchProps) => {
+      const options = {
+        contractAddress: poolManagerContractJson.address,
+        functionName,
+        abi: poolManagerContractJson.abi as AbiItem[],
+        params,
+      };
+
+      return rawFetch({ params: options });
+    },
+    ...rest,
+  };
+};
+
+const useExecuteDaiFunction = () => {
+  const { fetch: rawFetch, ...rest } = useWeb3ExecuteFunction();
+
+  return {
+    fetch: ({ functionName, params }: RequiredFetchProps) => {
+      const options = {
+        contractAddress: daiContractJson.address,
+        functionName,
+        abi: daiContractJson.abi as AbiItem[],
+        params,
+      };
+
+      return rawFetch({ params: options });
+    },
+    ...rest,
+  };
+};
 
 const SoleilProvider = ({ children }: SoleilProviderProps) => {
   const { web3, isWeb3Enabled, web3EnableError, enableWeb3, user, Moralis } =
@@ -33,8 +97,8 @@ const SoleilProvider = ({ children }: SoleilProviderProps) => {
     const connectToContract = async () => {
       if (web3) {
         const contract = new web3.eth.Contract(
-          contractJson.abi as AbiItem[],
-          contractJson.address
+          poolManagerContractJson.abi as AbiItem[],
+          poolManagerContractJson.address
         );
         setContract(contract);
       }
@@ -49,6 +113,10 @@ const SoleilProvider = ({ children }: SoleilProviderProps) => {
     <SoleilContext.Provider
       value={{
         contract,
+        poolManagerContractAddress: poolManagerContractJson.address,
+        daiContractAddress: daiContractJson.address,
+        useExecuteSoleilFunction,
+        useExecuteDaiFunction,
       }}
     >
       {children}
