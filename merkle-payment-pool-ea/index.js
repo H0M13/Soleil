@@ -8,7 +8,12 @@ const { fromString } = require("uint8arrays/from-string");
 const startOfDay = require("date-fns/startOfDay");
 const formatISO = require("date-fns/formatISO");
 const axios = require("axios").default;
-const { parseISO, differenceInDays, addDays } = require("date-fns");
+const {
+  parseISO,
+  differenceInDays,
+  addDays,
+  getUnixTime,
+} = require("date-fns");
 const CumulativePaymentTree = require("./cumulative-payment-tree.js");
 const poolManagerContract = require("./poolManagerContract.json");
 const { ethers } = require("ethers");
@@ -22,16 +27,13 @@ const createRequest = async (input, callback) => {
 
 const connectToContract = () => {
   const { address, abi } = poolManagerContract;
-  console.log(address);
-  console.log(abi);
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
   return new ethers.Contract(address, abi, provider);
 };
 
 const getDaiPayoutForDayWithTimestamp = async ({ timestamp, contract }) => {
-  const result = await contract.timestampToDaiToDistribute(123)
-  console.log(result)
-  return result
+  const result = await contract.timestampToDaiToDistribute(timestamp);
+  return result;
 };
 
 const performRequest = async ({ input, callback }) => {
@@ -61,14 +63,6 @@ const performRequest = async ({ input, callback }) => {
 
   const dataFeedDoc = await ceramic.loadStream(energyDataStreamId);
   const sites = dataFeedDoc.content.sites || [];
-
-  // TODO - Get real value from smart contract
-  const dailyDaiReward = 1230;
-  const contract = connectToContract();
-  const result = await getDaiPayoutForDayWithTimestamp({
-    timestamp: 123,
-    contract,
-  });
 
   const contractStartDateIso = process.env.START_DATE_ISO;
 
@@ -106,15 +100,44 @@ const performRequest = async ({ input, callback }) => {
   console.log(totalEnergyProducedPerDay);
   console.log(energyProducedBySitePerDay);
 
+  const daysSearchedAsUnixTimestamps = daysToSearch.map((day) =>
+    getUnixTime(new Date(day))
+  );
+  const contract = connectToContract();
+
+  // TODO: Ideally these should use multicall
+  const dailyRewardsPromises = energyProducedBySitePerDay.map((day, dayIndex) =>
+    getDaiPayoutForDayWithTimestamp({
+      timestamp: daysSearchedAsUnixTimestamps[dayIndex],
+      contract,
+    })
+  );
+
+  const DELAY_PER_REQUEST = 1000;
+  const appendDelayToPromise = (promise, delayInMs) =>
+    promise.then(
+      (value) =>
+        new Promise((resolve) => setTimeout(() => resolve(value), delayInMs))
+    );
+
+  const requestsWithDelay = dailyRewardsPromises.map((promise, index) =>
+    appendDelayToPromise(promise, index * DELAY_PER_REQUEST)
+  );
+
+  const dailyRewards = await Promise.all(requestsWithDelay);
+
   let cumulativeDaiEarningsBySite = {};
-  energyProducedBySitePerDay.forEach((day, dayIndex) => {
+  energyProducedBySitePerDay.forEach(async (day, dayIndex) => {
+    const dailyDaiReward = dailyRewards[dayIndex];
+
     for (var key in day) {
       if (day.hasOwnProperty(key)) {
         if (!cumulativeDaiEarningsBySite.hasOwnProperty(key)) {
           cumulativeDaiEarningsBySite[key] = 0;
         }
         cumulativeDaiEarningsBySite[key] += day[key]
-          ? (dailyDaiReward * day[key]) / totalEnergyProducedPerDay[dayIndex]
+          ? ((dailyDaiReward ? dailyDaiReward.toNumber() : 0) * day[key]) /
+            totalEnergyProducedPerDay[dayIndex]
           : 0;
       }
     }
@@ -123,10 +146,13 @@ const performRequest = async ({ input, callback }) => {
   let cumulativeDaiEarningsBySiteAsArray = [];
   for (var key in cumulativeDaiEarningsBySite) {
     if (cumulativeDaiEarningsBySite.hasOwnProperty(key)) {
-      cumulativeDaiEarningsBySiteAsArray.push({
-        address: key,
-        earnings: cumulativeDaiEarningsBySite[key],
-      });
+      const earnings = cumulativeDaiEarningsBySite[key];
+      if (earnings > 0) {
+        cumulativeDaiEarningsBySiteAsArray.push({
+          address: key,
+          earnings: cumulativeDaiEarningsBySite[key],
+        });
+      }
     }
   }
 
@@ -139,16 +165,18 @@ const performRequest = async ({ input, callback }) => {
   const daiEarningsDoc = await ceramic.loadStream(
     cumulativeDaiEarningsStreamId
   );
-  // await daiEarningsDoc.update(toWriteToCeramic);
+  await daiEarningsDoc.update(toWriteToCeramic);
 
-  // Generate merkle root for earnings
-  let paymentTree = new CumulativePaymentTree(
-    cumulativeDaiEarningsBySiteAsArray
-  );
+  let root = "";
 
-  let root = paymentTree.getHexRoot();
+  if (cumulativeDaiEarningsBySiteAsArray.length > 0) {
+    // Generate merkle root for earnings
+    let paymentTree = new CumulativePaymentTree(
+      cumulativeDaiEarningsBySiteAsArray
+    );
 
-  console.log(root);
+    root = paymentTree.getHexRoot();
+  }
 
   callback(
     200,
