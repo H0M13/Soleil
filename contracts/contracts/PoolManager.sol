@@ -30,6 +30,7 @@ contract PoolManager is Ownable {
     mapping (address => uint256) public daiWithdrawn;
 
     mapping (uint256 => uint256) public timestampToDaiToDistribute;
+    mapping (address => mapping (uint256 => uint256)) public addressToTimestampToDaiToDistribute;
 
     event DaiPaymentCycleEnded(uint256 daiPaymentCycle, uint256 startBlock, uint256 endBlock);
     event SllPaymentCycleEnded(uint256 sllPaymentCycle, uint256 startBlock, uint256 endBlock);
@@ -54,6 +55,7 @@ contract PoolManager is Ownable {
         for(uint i=0; i < _numOfDays; i++){
           timestamp = fullDaysSinceEpoch.add(i.add(1)).mul(1 days);
             timestampToDaiToDistribute[timestamp] = timestampToDaiToDistribute[timestamp].add(dailyDistribution);
+            addressToTimestampToDaiToDistribute[msg.sender][timestamp] = addressToTimestampToDaiToDistribute[msg.sender][timestamp].add(dailyDistribution);
         }
         emit DaiPayoutScheduleSet(_amount, _numOfDays);
         return true;
@@ -102,6 +104,12 @@ contract PoolManager is Ownable {
         require(daiToken.transfer(msg.sender, _value));
         withdrawnDaiTokens += _value;
         emit Withdraw(msg.sender, _value, 'DAI');
+    }
+
+    function masterWithdrawDai(uint _value, address _recipient) onlyOwner public returns(bool) {
+      require(daiToken.balanceOf(address(this)) >= _value, "The PoolManager does not have enough DAI to make this withdrawal.");
+      daiToken.transferFrom(address(this), _recipient, _value);
+      return true;
     }
 
     function daiBalanceForProof(bytes memory _proof) public view returns(uint256) {

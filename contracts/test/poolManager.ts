@@ -61,6 +61,8 @@ describe("PoolManager", () => {
   it("Should be able to set DAI payout schedule correctly", async () => {
     const amountOfDaiToSubmit = "1500";
     const numDays = 100;
+    const secondAmountOfDaiToSubmit = "1000";
+    const secondNumDays = 20;
 
     // Manipulate DAI balance locally through storage slots
     const Dai = new ethers.Contract(DAI_ADDRESS, erc20.abi, ethers.provider);
@@ -102,7 +104,8 @@ describe("PoolManager", () => {
       .to.emit(poolManagerContract, "DaiPayoutScheduleSet")
       .withArgs(ethers.utils.parseUnits(amountOfDaiToSubmit), numDays);
 
-    // Check that the timestampToDaiToDistribute mapping is set correctly.
+    // Check that the timestampToDaiToDistribute mapping and the 
+    // addressToTimestampToDaiToDistribute mapping are set correctly.
     // => 15 DAI per day for the next 100 days.
     const secondsSinceEpoch = Math.round(new Date().getTime() / 1000);
     const secondsInDay = 86400;
@@ -112,6 +115,61 @@ describe("PoolManager", () => {
     for (let i = 0; i < numDays; i++) {
       expect(
         await poolManagerContract.timestampToDaiToDistribute(
+          (fullDaysSinceEpoch + i + 1) * secondsInDay
+        )
+      ).to.equal(ethers.utils.parseUnits("15"));
+      expect(
+        await poolManagerContract.addressToTimestampToDaiToDistribute(
+          address1.address, 
+          (fullDaysSinceEpoch + i + 1) * secondsInDay
+        )
+      ).to.equal(ethers.utils.parseUnits("15"));
+    }
+
+    // Approve the pool manager contract to transfer an extra 1000 DAI
+    await Dai.connect(address1).approve(
+      poolManagerContract.address,
+      ethers.utils.parseUnits(secondAmountOfDaiToSubmit)
+    );
+
+    // Use the DAI to set a payout schedule of 1000 DAI over 20 days
+    await expect(
+      poolManagerContract
+        .connect(address1)
+        .setDaiPayoutSchedule(
+          ethers.utils.parseUnits(secondAmountOfDaiToSubmit),
+          secondNumDays
+        )
+    )
+      .to.emit(poolManagerContract, "DaiPayoutScheduleSet")
+      .withArgs(ethers.utils.parseUnits(secondAmountOfDaiToSubmit), secondNumDays);
+
+    // Check that the timestampToDaiToDistribute mapping and the 
+    // addressToTimestampToDaiToDistribute mapping are set correctly.
+    // => 65 DAI per day for the next 20 days, 15 DAI for the 80 days after that.
+    for (let i = 0; i < secondNumDays; i++) {
+      expect(
+        await poolManagerContract.timestampToDaiToDistribute(
+          (fullDaysSinceEpoch + i + 1) * secondsInDay
+        )
+      ).to.equal(ethers.utils.parseUnits("65"));
+      expect(
+        await poolManagerContract.addressToTimestampToDaiToDistribute(
+          address1.address, 
+          (fullDaysSinceEpoch + i + 1) * secondsInDay
+        )
+      ).to.equal(ethers.utils.parseUnits("65"));
+    }
+
+    for (let i = secondNumDays; i < numDays; i++) {
+      expect(
+        await poolManagerContract.timestampToDaiToDistribute(
+          (fullDaysSinceEpoch + i + 1) * secondsInDay
+        )
+      ).to.equal(ethers.utils.parseUnits("15"));
+      expect(
+        await poolManagerContract.addressToTimestampToDaiToDistribute(
+          address1.address, 
           (fullDaysSinceEpoch + i + 1) * secondsInDay
         )
       ).to.equal(ethers.utils.parseUnits("15"));
