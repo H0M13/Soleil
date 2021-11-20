@@ -1,11 +1,22 @@
 import { Box, Alert } from "@mui/material";
+import { useEffect } from "react";
 
 interface Props {
   text: string;
   severity: "error" | "warning" | "info" | "success";
+  onClick: Function;
+  index: number;
 };
 
-const ToastAlert = ({text, severity}: Props) => {
+const ToastAlert = ({text, severity, onClick, index}: Props) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const event = new CustomEvent('removeToast', { detail: { index } });
+      window.dispatchEvent(event);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <Box
       sx={{
@@ -19,7 +30,7 @@ const ToastAlert = ({text, severity}: Props) => {
       <Alert 
         severity={severity}
         variant="filled"
-        onClose={() => {}}
+        onClose={() => onClick()}
       >
         {text}
       </Alert>
