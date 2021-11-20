@@ -19,7 +19,7 @@ const ForSiteOwners = () => {
       }}
     >
       <CardContent>
-        <Typography variant="h5">For Solar Panel Owners</Typography>
+      <Typography variant="h5">For Solar Panel Owners</Typography>
         <List>
           <ListItem>
             <ListItemText

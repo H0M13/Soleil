@@ -8,8 +8,8 @@ import { Box, Theme } from "@mui/material";
 const Landing = () => {
   return (
     <>
-      <DaiBalance />
-      <UsersScheduledDaiPayouts />
+      {/* <DaiBalance /> */}
+      {/* <UsersScheduledDaiPayouts /> */}
       <Box
         sx={{
           display: "flex",
