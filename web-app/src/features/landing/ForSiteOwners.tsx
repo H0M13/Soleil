@@ -36,14 +36,32 @@ const ForSiteOwners = () => {
           mb: 2,
         }}
       >
-        <Button
-          variant="contained"
-          disableElevation
-          component={Link}
-          to="/register-site"
-        >
-          Register your site
-        </Button>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <Button
+            variant="contained"
+            disableElevation
+            component={Link}
+            to="/register-site"
+            style={{margin: '0 0 10px 0'}}
+          >
+            Register your site
+          </Button>
+
+          {/* TODO - Move? */}
+          <Button
+            variant="contained"
+            disableElevation
+            component={Link}
+            to="/claim"
+            style={{margin: '10px 0'}}
+          >
+            Claim Tokens
+          </Button>
+        </div>
+
       </CardActions>
     </Card>
   );
