@@ -7,7 +7,6 @@ const { Ed25519Provider } = require("key-did-provider-ed25519");
 const { fromString } = require("uint8arrays/from-string");
 const startOfDay = require("date-fns/startOfDay");
 const formatISO = require("date-fns/formatISO");
-const axios = require("axios").default;
 const {
   parseISO,
   differenceInDays,
@@ -16,7 +15,7 @@ const {
 } = require("date-fns");
 const CumulativePaymentTree = require("./cumulative-payment-tree.js");
 const poolManagerContract = require("./poolManagerContract.json");
-const { ethers } = require("ethers");
+const { ethers, BigNumber } = require("ethers");
 
 const createRequest = async (input, callback) => {
   return performRequest({
@@ -135,9 +134,10 @@ const performRequest = async ({ input, callback }) => {
         if (!cumulativeDaiEarningsBySite.hasOwnProperty(key)) {
           cumulativeDaiEarningsBySite[key] = 0;
         }
+        const denom = BigNumber.from(10).pow(18);
         cumulativeDaiEarningsBySite[key] += day[key]
-          ? ((dailyDaiReward ? dailyDaiReward.toNumber() : 0) * day[key]) /
-            totalEnergyProducedPerDay[dayIndex]
+          ? (dailyDaiReward ? dailyDaiReward.div(denom).toNumber() : 0) *
+            (day[key] / totalEnergyProducedPerDay[dayIndex])
           : 0;
       }
     }

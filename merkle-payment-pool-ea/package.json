@@ -13,7 +13,6 @@
     "@ceramicnetwork/http-client": "^1.4.4",
     "@ceramicnetwork/stream-tile": "^1.4.1",
     "@chainlink/external-adapter": "^0.2.6",
-    "axios": "^0.24.0",
     "date-fns": "^2.25.0",
     "dids": "^2.4.0",
     "dotenv": "^8.2.0",
