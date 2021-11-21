@@ -52,15 +52,15 @@ const cumulativeEarningsDataSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   title: "EnergyData",
   type: "object",
-  required: ["sites"],
+  required: ["recipients"],
   properties: {
-    sites: {
+    recipients: {
       type: "array",
-      items: { $ref: "#/$defs/site" },
+      items: { $ref: "#/$defs/recipient" },
     },
   },
   $defs: {
-    site: {
+    recipient: {
       type: "object",
       required: ["address", "earnings"],
       properties: {
@@ -68,7 +68,7 @@ const cumulativeEarningsDataSchema = {
           type: "string",
         },
         earnings: {
-          type: "number",
+          type: "string",
         },
       },
     },
@@ -130,7 +130,7 @@ async function run() {
   const daiEarningsDoc = await TileDocument.create(
     ceramic,
     {
-      sites: [],
+      recipients: [],
     },
     {
       controllers: [ceramic.did.id],
@@ -143,7 +143,7 @@ async function run() {
   const sllEarningsDoc = await TileDocument.create(
     ceramic,
     {
-      sites: [],
+      recipients: [],
     },
     {
       controllers: [ceramic.did.id],
@@ -182,7 +182,8 @@ async function run() {
     },
   };
   await writeFile("../web-app/src/config.json", JSON.stringify(config));
-  await writeFile("../merkle-payment-pool-ea/config.json", JSON.stringify(config));
+  await writeFile("../sll-earnings-calculator-ea/config.json", JSON.stringify(config));
+  await writeFile("../dai-earnings-calculator-ea/config.json", JSON.stringify(config));
   await writeFile("./config.json", JSON.stringify(config));
 
   console.log("Config written to config.json file:", config);

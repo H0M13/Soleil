@@ -17,6 +17,7 @@ const CumulativePaymentTree = require("./cumulative-payment-tree.js");
 const poolManagerContract = require("./poolManagerContract.json");
 const { ethers, BigNumber } = require("ethers");
 const Moralis = require("moralis/node");
+const web3Utils = require("web3-utils");
 
 const createRequest = async (input, callback) => {
   return performRequest({
@@ -179,33 +180,29 @@ const performRequest = async ({ input, callback }) => {
     if (!dailyDistribution.daiDistribution.isZero()) {
       // The user's earned SLL equal (their daily DAI distribution * total energy generated for that day) / (1000 * total daily DAI distribution)
 
-      const dayIndex = daysSearchedAsUnixTimestamps.indexOf(dailyDistribution.timestamp);
-
-      console.log(dayIndex);
+      const dayIndex = daysSearchedAsUnixTimestamps.indexOf(
+        dailyDistribution.timestamp
+      );
 
       const totalDailyDaiDistribution = dailyDaiRewards[dayIndex];
 
-      console.log(totalDailyDaiDistribution);
-
       const totalEnergyGeneratedThatDay = totalEnergyProducedPerDay[dayIndex];
 
-      console.log(dailyDistribution.daiDistribution)
-      console.log(totalEnergyGeneratedThatDay);
-
+      const tokenDenom = BigNumber.from(10).pow(18);
       const usersEarnedSll = dailyDistribution.daiDistribution
         .div(totalDailyDaiDistribution)
-        .toNumber() * totalEnergyGeneratedThatDay / 1000;
-
-      console.log("usersEarnedSll");
-
-      console.log(usersEarnedSll);
+        .mul(tokenDenom)
+        .mul(totalEnergyGeneratedThatDay)
+        .div(BigNumber.from(1000));
 
       const existingRecord = cumulativeSllEarningsByUserAsArray.findIndex(
         (item) => item.address === dailyDistribution.ethAddress
       );
       if (existingRecord > -1) {
-        cumulativeSllEarningsByUserAsArray[existingRecord].earnings +=
-          usersEarnedSll;
+        cumulativeSllEarningsByUserAsArray[existingRecord].earnings =
+          cumulativeSllEarningsByUserAsArray[existingRecord].earnings.add(
+            usersEarnedSll
+          );
       } else {
         cumulativeSllEarningsByUserAsArray.push({
           address: dailyDistribution.ethAddress,
@@ -215,8 +212,15 @@ const performRequest = async ({ input, callback }) => {
     }
   });
 
+  const withEarningsAsHexString = cumulativeSllEarningsByUserAsArray.map(
+    (item) => ({
+      address: item.address,
+      earnings: web3Utils.numberToHex(item.earnings),
+    })
+  );
+
   let toWriteToCeramic = {
-    sites: cumulativeSllEarningsByUserAsArray,
+    recipients: withEarningsAsHexString,
   };
 
   console.log(toWriteToCeramic);
@@ -228,11 +232,9 @@ const performRequest = async ({ input, callback }) => {
 
   let root = "";
 
-  if (cumulativeSllEarningsByUserAsArray.length > 0) {
+  if (withEarningsAsHexString.length > 0) {
     // Generate merkle root for earnings
-    let paymentTree = new CumulativePaymentTree(
-      cumulativeSllEarningsByUserAsArray
-    );
+    let paymentTree = new CumulativePaymentTree(withEarningsAsHexString);
 
     root = paymentTree.getHexRoot();
   }

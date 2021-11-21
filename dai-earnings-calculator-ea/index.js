@@ -16,6 +16,7 @@ const {
 const CumulativePaymentTree = require("./cumulative-payment-tree.js");
 const poolManagerContract = require("./poolManagerContract.json");
 const { ethers, BigNumber } = require("ethers");
+const web3Utils = require("web3-utils");
 
 const createRequest = async (input, callback) => {
   return performRequest({
@@ -132,13 +133,15 @@ const performRequest = async ({ input, callback }) => {
     for (var key in day) {
       if (day.hasOwnProperty(key)) {
         if (!cumulativeDaiEarningsBySite.hasOwnProperty(key)) {
-          cumulativeDaiEarningsBySite[key] = 0;
+          cumulativeDaiEarningsBySite[key] = BigNumber.from(0);
         }
-        const denom = BigNumber.from(10).pow(18);
-        cumulativeDaiEarningsBySite[key] += day[key]
-          ? (dailyDaiReward ? dailyDaiReward.div(denom).toNumber() : 0) *
-            (day[key] / totalEnergyProducedPerDay[dayIndex])
-          : 0;
+        cumulativeDaiEarningsBySite[key] = cumulativeDaiEarningsBySite[key].add(
+          day[key]
+            ? (dailyDaiReward ? dailyDaiReward : BigNumber.from(0))
+                .mul(day[key])
+                .div(totalEnergyProducedPerDay[dayIndex])
+            : 0
+        );
       }
     }
   });
@@ -156,8 +159,18 @@ const performRequest = async ({ input, callback }) => {
     }
   }
 
+  console.log("cumulativeDaiEarningsBySiteAsArray");
+  console.log(cumulativeDaiEarningsBySiteAsArray);
+
+  const withEarningsAsHexString = cumulativeDaiEarningsBySiteAsArray.map(
+    (item) => ({
+      address: item.address,
+      earnings: web3Utils.numberToHex(item.earnings),
+    })
+  );
+
   let toWriteToCeramic = {
-    sites: cumulativeDaiEarningsBySiteAsArray,
+    recipients: withEarningsAsHexString,
   };
 
   console.log(toWriteToCeramic);
@@ -169,11 +182,9 @@ const performRequest = async ({ input, callback }) => {
 
   let root = "";
 
-  if (cumulativeDaiEarningsBySiteAsArray.length > 0) {
+  if (withEarningsAsHexString.length > 0) {
     // Generate merkle root for earnings
-    let paymentTree = new CumulativePaymentTree(
-      cumulativeDaiEarningsBySiteAsArray
-    );
+    let paymentTree = new CumulativePaymentTree(withEarningsAsHexString);
 
     root = paymentTree.getHexRoot();
   }
