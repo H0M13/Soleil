@@ -4,11 +4,13 @@ import { Box, Button, Card } from "@mui/material";
 export interface MonitoringProviderProps {
   imgSrc: any;
   disabled?: boolean;
+  onClick?: Function;
 }
 
 export const MonitoringProvider = ({
   imgSrc,
   disabled = false,
+  onClick,
 }: MonitoringProviderProps) => {
   return (
     <Button
@@ -23,6 +25,7 @@ export const MonitoringProvider = ({
         position: "relative",
         border: "1px solid black",
       }}
+      onClick={() => {onClick && onClick()}}
     >
       <img src={imgSrc} width="100" />
       {disabled && (
