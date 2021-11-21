@@ -125,7 +125,7 @@ const performRequest = async ({ input, callback }) => {
       })
   );
 
-  const DELAY_PER_REQUEST = 1000;
+  const DELAY_PER_REQUEST = 200;
   const appendDelayToPromise = (promise, delayInMs) =>
     promise.then(
       (value) =>
@@ -192,11 +192,8 @@ const performRequest = async ({ input, callback }) => {
       console.log(dailyDistribution.daiDistribution)
       console.log(totalEnergyGeneratedThatDay);
 
-      // const sllTokenDenominator = BigNumber.from(10).pow(18);
       const usersEarnedSll = dailyDistribution.daiDistribution
         .div(totalDailyDaiDistribution)
-        // .div(1000)
-        // .mul(totalEnergyGeneratedThatDay)
         .toNumber() * totalEnergyGeneratedThatDay / 1000;
 
       console.log("usersEarnedSll");
