@@ -1,4 +1,4 @@
-import { Box, Container, createTheme, ThemeProvider } from "@mui/material";
+import { backdropClasses, Box, Container, createTheme, ThemeProvider } from "@mui/material";
 import { Header } from "../header/Header";
 import AppRoutes from "../../utils/routes";
 import useBlobity from "blobity/lib/useBlobity";
@@ -29,9 +29,9 @@ export const MainLayout = () => {
           sx={{
             display: "flex",
             alignItems: "flex-start",
-            justifyContent: 'flex-end',
-            width: '450px',
-            paddingTop: '30px'
+            justifyContent: 'center',
+            maxWidth: '300px',
+            flexShrink: 0
           }}
         >
           <Link
@@ -46,34 +46,36 @@ export const MainLayout = () => {
             position: "relative",
             display: "flex",
             flexDirection: "column",
-            padding: "10px",
             height: "100vh",
-            width: "100%",
             boxSizing: "border-box",
-            paddingTop: '30px'
+            paddingTop: '30px',
+            flexGrow: 1
           }}
         >
           <AlertManager />
           <Header />
           <Container
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                height: '100%',
-                justifyContent: 'center'
-              }}
-            >
-              <AppRoutes />
-              {/* <SitesDisplay /> */}
-            </Container>
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: 'center',
+              maxWidth: '10000px !important',
+              height: '100%',
+            }}
+          >
+            <AppRoutes />
+            {/* <SitesDisplay /> */}
+          </Container>
         </Box>
         <Box
           sx={{
-            width: "450px",
-            textAlign: 'center',
+            display: 'inline-block',
+            flexShrink: 5,
+            maxWidth: '300px',
+            flexGrow: 1,
           }}
-        />
+        >.</Box>
       </Box>
     </ThemeProvider>
   );
