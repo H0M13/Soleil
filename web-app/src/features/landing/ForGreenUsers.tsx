@@ -10,8 +10,12 @@ import {
   Typography,
 } from "@mui/material";
 import { Link } from "react-router-dom";
+import { useMoralis } from "react-moralis";
 
 const ForGreenUsers = () => {
+  const { isAuthenticated } =
+    useMoralis();
+
   return (
     <Card
       sx={{
@@ -50,6 +54,7 @@ const ForGreenUsers = () => {
           variant="contained"
           disableElevation
           component={Link}
+          disabled={!isAuthenticated}
           to="/submit-funds"
         >
           Submit DAI

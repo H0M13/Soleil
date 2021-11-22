@@ -22,8 +22,7 @@ export const AuthManager = () => {
           8
         )}...`}</Typography>
         <Button variant="contained" disableElevation onClick={() => {
-          const event = new CustomEvent('addToast', { detail: { text: "Successfully logged out", severity: "success" } });
-          window.dispatchEvent(event);
+          window.dispatchEvent(new CustomEvent('addToast', { detail: { text: "Successfully logged out", severity: "success" } }));
           logout();
         }}>
           Logout

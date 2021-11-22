@@ -11,8 +11,7 @@ interface Props {
 const ToastAlert = ({text, severity, onClick, index}: Props) => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      const event = new CustomEvent('removeToast', { detail: { index } });
-      window.dispatchEvent(event);
+      window.dispatchEvent(new CustomEvent('removeToast', { detail: { index } }));
     }, 3000);
     return () => clearTimeout(timer);
   }, []);
