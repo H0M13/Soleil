@@ -10,8 +10,12 @@ import {
   Typography,
 } from "@mui/material";
 import { Link } from "react-router-dom";
+import { useMoralis } from "react-moralis";
 
 const ForSiteOwners = () => {
+  const { isAuthenticated } =
+    useMoralis();
+
   return (
     <Card
       sx={{
@@ -45,6 +49,7 @@ const ForSiteOwners = () => {
             disableElevation
             component={Link}
             to="/register-site"
+            disabled={!isAuthenticated}
             style={{margin: '0 0 10px 0'}}
           >
             Register your site
@@ -56,6 +61,7 @@ const ForSiteOwners = () => {
             disableElevation
             component={Link}
             to="/claim"
+            disabled={!isAuthenticated}
             style={{margin: '10px 0'}}
           >
             Claim Tokens

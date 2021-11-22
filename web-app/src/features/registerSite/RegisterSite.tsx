@@ -8,6 +8,7 @@ import tesla from "../../resources/images/tesla.png";
 import solarEdge from "../../resources/images/solarEdge.png";
 import sma from "../../resources/images/sma.png";
 import React, { useState } from "react";
+import PleaseConnect from '../pleaseConnect/PleaseConnect';
 
 export const RegisterSite = () => {
   //  TODO: Either only allow registering a site when connected or add a wallet field to form
@@ -16,7 +17,7 @@ export const RegisterSite = () => {
     mode: "onChange",
   });
 
-  const { Moralis } = useMoralis();
+  const { Moralis, isAuthenticated } = useMoralis();
 
   const { isDirty } = formState;
 
@@ -35,6 +36,12 @@ export const RegisterSite = () => {
   const selectedSite = "SolarEdge";
   const [activeStep, setActiveStep] = useState(0);
   const steps = ["Select your monitoring provider", "Enter Credentials"];
+
+  if (!isAuthenticated) {
+    return (
+      <PleaseConnect />
+    );
+  }
 
   return (
     <form id="profile-form" onSubmit={handleSubmit(onSubmit)}>

@@ -1,7 +1,12 @@
 import { useForm, Controller } from "react-hook-form";
 import { Box, Button, TextField, Typography, Theme } from "@mui/material";
+import { useMoralis } from "react-moralis";
+import PleaseConnect from '../pleaseConnect/PleaseConnect';
 
 export const ClaimTokens = () => {
+  const { isAuthenticated } =
+    useMoralis();
+
   const { handleSubmit, control, reset, formState } = useForm({
     mode: "onChange",
   });
@@ -11,6 +16,12 @@ export const ClaimTokens = () => {
   const onSubmit = async (data: any) => {
     console.log("Hello");
   };
+
+  if (!isAuthenticated) {
+    return (
+      <PleaseConnect />
+    );
+  }
 
   return (
     <form id="donation-form" onSubmit={handleSubmit(onSubmit)}>

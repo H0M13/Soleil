@@ -2,6 +2,8 @@ import { useForm, Controller } from "react-hook-form";
 import { Box, Button, TextField, Typography, Theme } from "@mui/material";
 import { ethers } from "ethers";
 import { useSoleil } from "../../context/SoleilContext";
+import { useMoralis } from "react-moralis";
+import PleaseConnect from '../pleaseConnect/PleaseConnect';
 
 export const SubmitFunds = () => {
   const {
@@ -19,6 +21,8 @@ export const SubmitFunds = () => {
   const { handleSubmit, control, reset, formState } = useForm({
     mode: "onChange",
   });
+
+  const { isAuthenticated } = useMoralis();
 
   const { isDirty } = formState;
 
@@ -53,6 +57,12 @@ export const SubmitFunds = () => {
 
     console.log(soleilResult);
   };
+
+  if (!isAuthenticated) {
+    return (
+      <PleaseConnect />
+    );
+  }
 
   return (
     <form id="donation-form" onSubmit={handleSubmit(onSubmit)}>
