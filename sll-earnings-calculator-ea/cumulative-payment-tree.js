@@ -23,14 +23,8 @@ const _ = require('lodash');
 class CumulativePaymentTree extends MerkleTree {
   constructor(paymentList) {
     let filteredPaymentList = paymentList.filter(payment => payment.address && payment.earnings);
-    let groupedPayees = _.groupBy(filteredPaymentList, payment => payment.address);
-    let reducedPaymentList = Object.keys(groupedPayees).map(address => {
-      let payments = groupedPayees[address];
-      let earnings = _.reduce(payments, (sum, payment) => sum + payment.earnings, 0);
-      return { address, earnings };
-    });
-    super(reducedPaymentList);
-    this.paymentNodes = reducedPaymentList
+    super(filteredPaymentList);
+    this.paymentNodes = filteredPaymentList
   }
 
   amountForPayee(address) {

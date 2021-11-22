@@ -4,11 +4,14 @@ import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import erc20 from "../artifacts/@openzeppelin/contracts/token/ERC20/ERC20.sol/ERC20.json";
 
+const CumulativePaymentTree = require("./cumulative-payment-tree.js");
+
 describe("PoolManager", () => {
   let poolManagerContract: Contract;
   let soleilTokenContract: Contract;
   let owner: SignerWithAddress;
   let address1: SignerWithAddress;
+  let address2: SignerWithAddress;
 
   const DAI_ADDRESS = "0x6b175474e89094c44da98b954eedeac495271d0f";
   const DAI_SLOT = 2;
@@ -17,14 +20,14 @@ describe("PoolManager", () => {
     const soleilTokenFactory = await ethers.getContractFactory("SoleilToken");
     soleilTokenContract = await soleilTokenFactory.deploy();
 
+    [owner, address1, address2] = await ethers.getSigners();
+
     const poolManagerFactory = await ethers.getContractFactory("PoolManager");
     poolManagerContract = await poolManagerFactory.deploy(
       soleilTokenContract.address,
       DAI_ADDRESS,
-      process.env.CHAINLINK_NODE_ADDRESS || ""
+      address2.address
     );
-
-    [owner, address1] = await ethers.getSigners();
   });
 
   it("Should set the right owner", async () => {
@@ -57,6 +60,59 @@ describe("PoolManager", () => {
         poolManagerContract.address
       )
     ).to.equal(true);
+  });
+
+  it("Should be able to get DAI balance for proof with address", async () => {
+    const site1 = "0x4010e200a18FD8756d55105c2F8Fd88DDBD810ce"
+    const site2 = "0x4282040aE3a28C967612b580C8516a48b8f3A663"
+    const earnings1 = "0x0de86fab3c3f42d9"
+    const earnings2 = "0x39f58b9bafbd73fe"
+
+    const testData = [
+      {
+        address: site1,
+        earnings: earnings1,
+      },
+      {
+        address: site2,
+        earnings: earnings2,
+      },
+    ];
+
+    const paymentTree = new CumulativePaymentTree(testData);
+
+    const merkleRoot = paymentTree.getHexRoot();
+
+    await poolManagerContract.connect(address2).submitDaiMerkleRoot(merkleRoot);
+
+    // Test for verification success on site1 with proof1
+    const proof1 = paymentTree.hexProofForPayee(
+      site1,
+      1
+    );
+    const daiBalance1 = await poolManagerContract.daiBalanceForProofWithAddress(
+      site1,
+      proof1
+    );
+    expect(daiBalance1.toHexString()).to.equal(earnings1);
+
+    // Test for verification success on site2 with proof2
+    const proof2 = paymentTree.hexProofForPayee(
+      site2,
+      1
+    );
+    const daiBalance2 = await poolManagerContract.daiBalanceForProofWithAddress(
+      site2,
+      proof2
+    );
+    expect(daiBalance2.toHexString()).to.equal(earnings2);
+
+    // Test for a verification failure with site2 and proof1
+    const daiBalance3 = await poolManagerContract.daiBalanceForProofWithAddress(
+      site2,
+      proof1
+    );
+    expect(daiBalance3.toHexString()).to.equal("0x00");
   });
 
   it("Should be able to set DAI payout schedule correctly", async () => {
@@ -105,7 +161,7 @@ describe("PoolManager", () => {
       .to.emit(poolManagerContract, "DaiPayoutScheduleSet")
       .withArgs(ethers.utils.parseUnits(amountOfDaiToSubmit), numDays);
 
-    // Check that the timestampToDaiToDistribute mapping and the 
+    // Check that the timestampToDaiToDistribute mapping and the
     // addressToTimestampToDaiToDistribute mapping are set correctly.
     // => 15 DAI per day for the next 100 days.
     const secondsSinceEpoch = Math.round(new Date().getTime() / 1000);
@@ -121,7 +177,7 @@ describe("PoolManager", () => {
       ).to.equal(ethers.utils.parseUnits("15"));
       expect(
         await poolManagerContract.addressToTimestampToDaiToDistribute(
-          address1.address, 
+          address1.address,
           (fullDaysSinceEpoch + i + 1) * secondsInDay
         )
       ).to.equal(ethers.utils.parseUnits("15"));
@@ -145,7 +201,7 @@ describe("PoolManager", () => {
       .to.emit(poolManagerContract, "DaiPayoutScheduleSet")
       .withArgs(ethers.utils.parseUnits(secondAmountOfDaiToSubmit), secondNumDays);
 
-    // Check that the timestampToDaiToDistribute mapping and the 
+    // Check that the timestampToDaiToDistribute mapping and the
     // addressToTimestampToDaiToDistribute mapping are set correctly.
     // => 65 DAI per day for the next 20 days, 15 DAI for the 80 days after that.
     for (let i = 0; i < secondNumDays; i++) {
@@ -156,7 +212,7 @@ describe("PoolManager", () => {
       ).to.equal(ethers.utils.parseUnits("65"));
       expect(
         await poolManagerContract.addressToTimestampToDaiToDistribute(
-          address1.address, 
+          address1.address,
           (fullDaysSinceEpoch + i + 1) * secondsInDay
         )
       ).to.equal(ethers.utils.parseUnits("65"));
@@ -170,7 +226,7 @@ describe("PoolManager", () => {
       ).to.equal(ethers.utils.parseUnits("15"));
       expect(
         await poolManagerContract.addressToTimestampToDaiToDistribute(
-          address1.address, 
+          address1.address,
           (fullDaysSinceEpoch + i + 1) * secondsInDay
         )
       ).to.equal(ethers.utils.parseUnits("15"));

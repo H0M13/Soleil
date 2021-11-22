@@ -185,7 +185,7 @@ const performRequest = async ({ input, callback }) => {
   if (withEarningsAsHexString.length > 0) {
     // Generate merkle root for earnings
     let paymentTree = new CumulativePaymentTree(withEarningsAsHexString);
-
+    console.log(paymentTree.getHexRoot());
     root = paymentTree.getHexRoot();
   }
 

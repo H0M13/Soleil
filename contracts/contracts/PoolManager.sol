@@ -10,7 +10,6 @@ import './SoleilToken.sol';
 contract PoolManager is Ownable {
 
     using SafeMath for uint256;
-    using MerkleProof for bytes32[];
     
     mapping(uint256 => bytes32) daiRoots;
     mapping(uint256 => bytes32) sllRoots;
@@ -128,7 +127,7 @@ contract PoolManager is Ownable {
         return sllBalanceForProofWithAddress(msg.sender, _proof);
     }
 
-    function startNewDaiPaymentCycle() internal onlyOwner returns(bool) {
+    function startNewDaiPaymentCycle() internal onlyChainlinkNode returns(bool) {
         require(block.number > currentDaiPaymentCycleStartBlock);
 
         emit DaiPaymentCycleEnded(numDaiPaymentCycles, currentDaiPaymentCycleStartBlock, block.number);
@@ -139,7 +138,7 @@ contract PoolManager is Ownable {
         return true;
     } 
 
-    function startNewSllPaymentCycle() internal onlyOwner returns(bool) {
+    function startNewSllPaymentCycle() internal onlyChainlinkNode returns(bool) {
         require(block.number > currentSllPaymentCycleStartBlock);
 
         emit SllPaymentCycleEnded(numSllPaymentCycles, currentSllPaymentCycleStartBlock, block.number);
@@ -167,8 +166,8 @@ contract PoolManager is Ownable {
                                                   cumulativeAmount
                                                   )
                                  );
-        if (daiWithdrawn[_address] < cumulativeAmount &&
-            _proof.verify(daiRoots[daiPaymentCycleNumber], leaf)) {
+        
+        if (daiWithdrawn[_address] < cumulativeAmount && MerkleProof.verify(_proof, daiRoots[daiPaymentCycleNumber], leaf)) {
           return cumulativeAmount.sub(daiWithdrawn[_address]);
         } else {
           return 0;
@@ -192,8 +191,7 @@ contract PoolManager is Ownable {
                                                   cumulativeAmount
                                                   )
                                  );
-        if (sllWithdrawn[_address] < cumulativeAmount &&
-            _proof.verify(sllRoots[sllPaymentCycleNumber], leaf)) {
+        if (sllWithdrawn[_address] < cumulativeAmount && MerkleProof.verify(_proof, sllRoots[sllPaymentCycleNumber], leaf)) {
           return cumulativeAmount.sub(sllWithdrawn[_address]);
         } else {
           return 0;

@@ -1,6 +1,6 @@
-const MerkleTree = require('./merkle-tree');
-const { bufferToHex, zeros } = require('ethereumjs-util');
-const _ = require('lodash');
+import MerkleTree from './merkleTree';
+import { bufferToHex, zeros } from 'ethereumjs-util';
+import _ from 'lodash';
 
 /*
  * `paymentList` is an array of objects that have a property `address` to hold the
@@ -20,7 +20,7 @@ const _ = require('lodash');
  *
  */
 
-class CumulativePaymentTree extends MerkleTree {
+export default class CumulativePaymentTree extends MerkleTree {
   constructor(paymentList) {
     let filteredPaymentList = paymentList.filter(payment => payment.address && payment.earnings);
     super(filteredPaymentList);
@@ -40,5 +40,3 @@ class CumulativePaymentTree extends MerkleTree {
     return this.getHexProof(leaf, [ paymentCycle, this.amountForPayee(address) ]);
   }
 }
-
-module.exports = CumulativePaymentTree
