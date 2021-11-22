@@ -4,6 +4,8 @@ import AppRoutes from "../../utils/routes";
 import useBlobity from "blobity/lib/useBlobity";
 import themeOptions from "./theme";
 import AlertManager from "../alerts/AlertManager";
+import { Logo } from "../header/Logo";
+import { Link } from "react-router-dom";
 
 export const MainLayout = () => {
   const options = {
@@ -19,27 +21,59 @@ export const MainLayout = () => {
     <ThemeProvider theme={themeOptions}>
       <Box
         sx={{
-          position: "relative",
           display: "flex",
-          flexDirection: "column",
-          padding: "10px",
-          height: "100vh",
-          width: "100%",
-          boxSizing: "border-box"
+          flexDirection: "row",
         }}
       >
-        <AlertManager />
-        <Header />
-        <Container
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: 'flex-end',
+            width: '450px',
+            paddingTop: '30px'
+          }}
+        >
+          <Link
+            to="/"
+            data-blobity-radius="130"
           >
-            <AppRoutes />
-            {/* <SitesDisplay /> */}
-          </Container>
+            <Logo />
+          </Link>
+        </Box>
+        <Box
+          sx={{
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            padding: "10px",
+            height: "100vh",
+            width: "100%",
+            boxSizing: "border-box",
+            paddingTop: '30px'
+          }}
+        >
+          <AlertManager />
+          <Header />
+          <Container
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                height: '100%',
+                justifyContent: 'center'
+              }}
+            >
+              <AppRoutes />
+              {/* <SitesDisplay /> */}
+            </Container>
+        </Box>
+        <Box
+          sx={{
+            width: "450px",
+            textAlign: 'center',
+          }}
+        />
       </Box>
     </ThemeProvider>
   );

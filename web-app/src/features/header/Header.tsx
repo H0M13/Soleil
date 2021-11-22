@@ -14,9 +14,6 @@ export const Header = () => {
         alignItems: "flex-start",
       }}
     >
-      <Link to="/" data-blobity-radius="130">
-        <Logo />
-      </Link>
       <Button
         variant="contained"
         disableElevation
