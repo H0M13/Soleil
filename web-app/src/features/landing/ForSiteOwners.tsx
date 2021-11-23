@@ -54,18 +54,6 @@ const ForSiteOwners = () => {
           >
             Register your site
           </Button>
-
-          {/* TODO - Move? */}
-          <Button
-            variant="contained"
-            disableElevation
-            component={Link}
-            to="/claim"
-            disabled={!isAuthenticated}
-            style={{margin: '10px 0'}}
-          >
-            Claim Tokens
-          </Button>
         </div>
 
       </CardActions>
