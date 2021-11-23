@@ -29,36 +29,31 @@ export const MainLayout = () => {
       <ThemeProvider theme={themeOptions}>
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "row",
+            display: "grid",
+            gridTemplateAreas: `
+            "logo header ."
+            "content content content"
+            `,
+            gridTemplateColumns: "300px auto 200px",
+            gridTemplateRows: "300px auto",
           }}
         >
           <Box
             sx={{
+              gridArea: "logo",
               display: "flex",
-              alignItems: "flex-start",
               justifyContent: "center",
-              maxWidth: "300px",
-              flexShrink: 0,
+              alignItems: "center",
             }}
           >
             <Link to="/" data-blobity-radius="130">
               <Logo />
             </Link>
           </Box>
-          <Box
-            sx={{
-              position: "relative",
-              display: "flex",
-              flexDirection: "column",
-              height: "100vh",
-              boxSizing: "border-box",
-              paddingTop: "30px",
-              flexGrow: 1,
-            }}
-          >
-            <AlertManager />
+          <Box sx={{ gridArea: "header" }}>
             <Header />
+          </Box>
+          <Box sx={{ gridArea: "content" }}>
             <Container
               sx={{
                 display: "flex",
@@ -70,18 +65,8 @@ export const MainLayout = () => {
               }}
             >
               <AppRoutes />
-              {/* <SitesDisplay /> */}
             </Container>
-          </Box>
-          <Box
-            sx={{
-              display: "inline-block",
-              flexShrink: 5,
-              maxWidth: "300px",
-              flexGrow: 1,
-            }}
-          >
-            .
+            <AlertManager />
           </Box>
         </Box>
       </ThemeProvider>

@@ -10,20 +10,19 @@ export const Header = () => {
       maxWidth="xl"
       sx={{
         display: "flex",
-        justifyContent: "space-between",
+        justifyContent: "flex-end",
         alignItems: "flex-start",
+        marginTop: "40px"
       }}
     >
-      <Button
+      {/* <Button
         variant="contained"
         disableElevation
         component={Link}
         to="/"
-        style={{ margin: "0" }}
       >
         Home
-      </Button>
-      <div style={{ flexGrow: 1 }} />
+      </Button> */}
       <AuthManager />
     </Container>
   );
