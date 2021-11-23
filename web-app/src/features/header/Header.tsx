@@ -2,6 +2,7 @@ import React from "react";
 import { Container, Button } from "@mui/material";
 import { AuthManager } from "./AuthManager";
 import { Logo } from "./Logo";
+import { ClaimableDai } from "./ClaimableDai";
 import { Link } from "react-router-dom";
 
 export const Header = () => {
@@ -19,11 +20,12 @@ export const Header = () => {
         disableElevation
         component={Link}
         to="/"
-        style={{margin: '0'}}
+        style={{ margin: "0" }}
       >
         Home
       </Button>
-      <div style={{flexGrow: 1}}/>
+      <div style={{ flexGrow: 1 }} />
+      <ClaimableDai />
       <AuthManager />
     </Container>
   );

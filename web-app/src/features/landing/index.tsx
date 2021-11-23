@@ -3,26 +3,24 @@ import ForGreenUsers from "./ForGreenUsers";
 import { DaiBalance } from "./DaiBalance";
 import { UsersScheduledDaiPayouts } from "./UsersScheduledDaiPayouts";
 import { LeftStats, RightStats } from "../stats/StatsContainer";
-
 import { Box, Theme } from "@mui/material";
 import React from "react";
 
 const Landing = () => {
   return (
     <React.Fragment
-      // style={{
-      //   backgroundColor: 'purple',
-      //   height: '100%',
-      //   width: '100%'
-      // }}
+    // style={{
+    //   backgroundColor: 'purple',
+    //   height: '100%',
+    //   width: '100%'
+    // }}
     >
       {/* <DaiBalance /> */}
       {/* <UsersScheduledDaiPayouts /> */}
-
       <Box
         sx={{
           display: "flex",
-          width: '100%',
+          width: "100%",
         }}
       >
         <LeftStats />

@@ -7,7 +7,7 @@ import {
 import poolManagerContractJson from "./soleilContract.json";
 import daiContractJson from "./daiContract.json";
 import { AbiItem } from "web3-utils";
-import { Contract } from "web3-eth-contract";
+import { Contract, ethers } from "ethers";
 
 interface SoleilContextValue {
   contract?: Contract;
@@ -95,18 +95,18 @@ const SoleilProvider = ({ children }: SoleilProviderProps) => {
 
   useEffect(() => {
     const connectToContract = async () => {
-      if (web3) {
-        const contract = new web3.eth.Contract(
-          poolManagerContractJson.abi as AbiItem[],
-          poolManagerContractJson.address
-        );
-        setContract(contract);
-      }
+      const provider = new ethers.providers.JsonRpcProvider(
+        process.env.REACT_APP_RPC_URL
+      );
+      const contract = new ethers.Contract(
+        poolManagerContractJson.address,
+        poolManagerContractJson.abi,
+        provider
+      );
+      setContract(contract);
     };
 
-    if (web3 && isWeb3Enabled) {
-      connectToContract();
-    }
+    connectToContract();
   }, [web3, isWeb3Enabled]);
 
   return (

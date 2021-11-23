@@ -2,11 +2,12 @@ import { ethers, BigNumber } from "ethers";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import config from "../config.json";
 import CumulativePaymentTree from "../utils/cumulativePaymentTree";
-import { hexToNumberString } from "web3-utils"
+import { hexToNumberString } from "web3-utils";
 const { CeramicClient } = require("@ceramicnetwork/http-client");
 interface CeramicContextValue {
   daiEarningsData?: any;
   sllEarningsData?: any;
+  getProofForDaiEarnings: (address: string, paymentCycleNumber: number) => string;
 }
 
 const CeramicContext = createContext<CeramicContextValue | undefined>(
@@ -70,11 +71,28 @@ const CeramicProvider = ({ children }: CeramicProviderProps) => {
     }
   }, [daiEarningsData]);
 
+  const getProofForDaiEarnings = (address: string, paymentCycleNumber: number) => {
+    let proof = "";
+    // @ts-ignore
+    if (address && paymentCycleNumber && daiEarningsData && daiEarningsData.content.recipients.length > 0) {
+      // @ts-ignore
+      const paymentsData = daiEarningsData.content.recipients;
+      const daiPaymentTree = new CumulativePaymentTree(paymentsData);
+
+      proof = daiPaymentTree.hexProofForPayee(
+        address,
+        +paymentCycleNumber
+      );
+    }
+    return proof;
+  };
+
   return (
     <CeramicContext.Provider
       value={{
         daiEarningsData,
         sllEarningsData,
+        getProofForDaiEarnings
       }}
     >
       {children}
