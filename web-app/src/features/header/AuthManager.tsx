@@ -2,6 +2,7 @@ import React from "react";
 import { Button, Box, Theme, Typography } from "@mui/material";
 import { useMoralis } from "react-moralis";
 import PersonIcon from "@mui/icons-material/Person";
+import { Link } from "react-router-dom";
 
 export const AuthManager = () => {
   const { authenticate, isAuthenticated, isAuthenticating, logout, user } =
@@ -21,11 +22,25 @@ export const AuthManager = () => {
           0,
           8
         )}...`}</Typography>
-        <Button variant="contained" disableElevation onClick={() => {
-          window.dispatchEvent(new CustomEvent('addToast', { detail: { text: "Successfully logged out", severity: "success" } }));
-          logout();
-        }}>
+        <Button
+          variant="contained"
+          disableElevation
+          onClick={() => {
+            window.dispatchEvent(
+              new CustomEvent("addToast", {
+                detail: {
+                  text: "Successfully logged out",
+                  severity: "success",
+                },
+              })
+            );
+            logout();
+          }}
+        >
           Logout
+        </Button>
+        <Button variant="contained" disableElevation component={Link} to="/dashboard">
+          Dashboard
         </Button>
       </Box>
     );
