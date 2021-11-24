@@ -24,8 +24,12 @@ const ClaimableTokensProvider = ({
 }: ClaimableTokensProviderProps) => {
   const { contract } = useSoleil();
   const { user } = useMoralis();
-  const { daiEarningsData, sllEarningsData, getProofForDaiEarnings, getProofForSllEarnings } =
-    useCeramic();
+  const {
+    daiEarningsData,
+    sllEarningsData,
+    getProofForDaiEarnings,
+    getProofForSllEarnings,
+  } = useCeramic();
 
   const getUsersProofForDaiEarnings = async () => {
     const daiPaymentCycleNumber = contract
@@ -86,10 +90,10 @@ const ClaimableTokensProvider = ({
       const userAddress = toChecksumAddress(user?.attributes.ethAddress);
       const proof = await getUsersProofForDaiEarnings();
 
-      const daiBalance = await contract?.daiBalanceForProofWithAddress(
-        userAddress,
-        proof
-      );
+      const daiBalance =
+        proof && userAddress
+          ? await contract?.daiBalanceForProofWithAddress(userAddress, proof)
+          : "";
 
       setClaimableDai(daiBalance ? daiBalance.toString() : "");
     };
@@ -111,10 +115,10 @@ const ClaimableTokensProvider = ({
       const userAddress = toChecksumAddress(user?.attributes.ethAddress);
       const proof = await getUsersProofForSllEarnings();
 
-      const sllBalance = await contract?.sllBalanceForProofWithAddress(
-        userAddress,
-        proof
-      );
+      const sllBalance =
+        proof && userAddress
+          ? await contract?.sllBalanceForProofWithAddress(userAddress, proof)
+          : "";
 
       setClaimableSll(sllBalance ? sllBalance.toString() : "");
     };
