@@ -1,4 +1,5 @@
 import { YourClaimableDai } from "./YourClaimableDai";
+import { YourClaimableSll } from "./YourClaimableSll";
 import { Box } from "@mui/material";
 import React from "react";
 
@@ -12,6 +13,7 @@ const Dashboard = () => {
         }}
       >
           <YourClaimableDai />
+          <YourClaimableSll />
       </Box>
     </React.Fragment>
   );

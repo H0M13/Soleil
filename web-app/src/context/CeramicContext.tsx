@@ -8,6 +8,7 @@ interface CeramicContextValue {
   daiEarningsData?: any;
   sllEarningsData?: any;
   getProofForDaiEarnings: (address: string, paymentCycleNumber: number) => string;
+  getProofForSllEarnings: (address: string, paymentCycleNumber: number) => string;
 }
 
 const CeramicContext = createContext<CeramicContextValue | undefined>(
@@ -67,12 +68,29 @@ const CeramicProvider = ({ children }: CeramicProviderProps) => {
     return proof;
   };
 
+  const getProofForSllEarnings = (address: string, paymentCycleNumber: number) => {
+    let proof = "";
+    // @ts-ignore
+    if (address && paymentCycleNumber && sllEarningsData && sllEarningsData.content.recipients.length > 0) {
+      // @ts-ignore
+      const paymentsData = sllEarningsData.content.recipients;
+      const sllPaymentTree = new CumulativePaymentTree(paymentsData);
+
+      proof = sllPaymentTree.hexProofForPayee(
+        address,
+        +paymentCycleNumber
+      );
+    }
+    return proof;
+  };
+
   return (
     <CeramicContext.Provider
       value={{
         daiEarningsData,
         sllEarningsData,
-        getProofForDaiEarnings
+        getProofForDaiEarnings,
+        getProofForSllEarnings
       }}
     >
       {children}
