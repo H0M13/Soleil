@@ -62,9 +62,7 @@ const ClaimableTokensProvider = ({
       ? await contract?.numSllPaymentCycles()
       : null;
 
-    const userAddress = user
-      ? toChecksumAddress(user?.attributes.ethAddress)
-      : "";
+    const userAddress = user ? user?.attributes.ethAddress : "";
 
     let proof = "";
     // @ts-ignore
@@ -112,7 +110,7 @@ const ClaimableTokensProvider = ({
 
   useEffect(() => {
     const getClaimableAmount = async () => {
-      const userAddress = toChecksumAddress(user?.attributes.ethAddress);
+      const userAddress = user?.attributes.ethAddress;
       const proof = await getUsersProofForSllEarnings();
 
       const sllBalance =

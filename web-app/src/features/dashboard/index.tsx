@@ -10,6 +10,8 @@ const Dashboard = () => {
         sx={{
           display: "flex",
           width: "100%",
+          justifyContent: "center",
+          gap: (theme) => theme.spacing(4)
         }}
       >
           <YourClaimableDai />

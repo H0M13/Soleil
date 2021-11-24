@@ -116,7 +116,7 @@ export const YourClaimableDai = () => {
                 disableElevation
                 disabled={!isDirty}
                 type="submit"
-                form="donation-form"
+                form="dai-claim-form"
               >
                 Submit
               </Button>
@@ -137,6 +137,9 @@ export const YourClaimableDai = () => {
             disableElevation
             onClick={toggleIsClaiming}
             style={{ margin: "10px 0" }}
+            disabled={
+              claimableDai === undefined || parseFloat(claimableDai) <= 0
+            }
           >
             Claim Tokens
           </Button>
