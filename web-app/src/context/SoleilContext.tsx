@@ -11,6 +11,7 @@ import { Contract, ethers } from "ethers";
 
 interface SoleilContextValue {
   contract?: Contract;
+  provider?: ethers.providers.JsonRpcProvider;
   poolManagerContractAddress: string;
   daiContractAddress: string;
   useExecuteSoleilFunction: () => {
@@ -82,6 +83,9 @@ const SoleilProvider = ({ children }: SoleilProviderProps) => {
   const { web3, isWeb3Enabled, web3EnableError, enableWeb3, user, Moralis } =
     useMoralis();
 
+  const [provider, setProvider] = useState<
+    ethers.providers.JsonRpcProvider | undefined
+  >(undefined);
   const [contract, setContract] = useState<Contract | undefined>(undefined);
 
   useEffect(() => {
@@ -95,15 +99,22 @@ const SoleilProvider = ({ children }: SoleilProviderProps) => {
 
   useEffect(() => {
     const connectToContract = async () => {
-      const provider = new ethers.providers.JsonRpcProvider(
-        process.env.REACT_APP_RPC_URL
-      );
-      const contract = new ethers.Contract(
-        poolManagerContractJson.address,
-        poolManagerContractJson.abi,
-        provider
-      );
-      setContract(contract);
+      try {
+        const provider = new ethers.providers.JsonRpcProvider(
+          process.env.REACT_APP_RPC_URL
+        );
+        const contract = new ethers.Contract(
+          poolManagerContractJson.address,
+          poolManagerContractJson.abi,
+          provider
+        );
+        setProvider(provider);
+        setContract(contract);
+      } catch (err) {
+        console.error(
+          "Something went wrong while initialising provider and contract"
+        );
+      }
     };
 
     connectToContract();
@@ -113,6 +124,7 @@ const SoleilProvider = ({ children }: SoleilProviderProps) => {
     <SoleilContext.Provider
       value={{
         contract,
+        provider,
         poolManagerContractAddress: poolManagerContractJson.address,
         daiContractAddress: daiContractJson.address,
         useExecuteSoleilFunction,

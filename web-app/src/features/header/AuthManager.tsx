@@ -29,7 +29,7 @@ export const AuthManager = () => {
             window.dispatchEvent(
               new CustomEvent("addToast", {
                 detail: {
-                  text: "Successfully logged out",
+                  content: "Successfully logged out",
                   severity: "success",
                 },
               })

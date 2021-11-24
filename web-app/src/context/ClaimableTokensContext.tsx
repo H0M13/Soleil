@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useSoleil } from "./SoleilContext";
 import { useMoralis } from "react-moralis";
 import { useCeramic } from "./CeramicContext";
-import { toChecksumAddress, fromWei } from "web3-utils";
+import { toChecksumAddress } from "web3-utils";
 
 interface ClaimableTokensContextValue {
   claimableDai: string;
@@ -34,7 +34,7 @@ const ClaimableTokensProvider = ({
       // TODO: I think having to -1 here is a bug
       const proof = getProofForDaiEarnings(
         userAddress,
-        daiPaymentCycleNumber - 1
+        daiPaymentCycleNumber.toNumber() - 1
       );
 
       const daiBalance = await contract?.daiBalanceForProofWithAddress(
@@ -42,13 +42,18 @@ const ClaimableTokensProvider = ({
         proof
       );
 
-      setClaimableDai(daiBalance.toString());
+      setClaimableDai(daiBalance ? daiBalance.toString() : "");
     };
 
-    if (daiEarningsData && daiEarningsData.content.recipients.length > 0) {
+    if (
+      user &&
+      contract &&
+      daiEarningsData &&
+      daiEarningsData.content.recipients.length > 0
+    ) {
       getClaimableAmount();
     }
-  }, [daiEarningsData]);
+  }, [daiEarningsData, contract, user]);
 
   return (
     <ClaimableTokensContext.Provider

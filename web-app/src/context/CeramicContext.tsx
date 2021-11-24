@@ -51,26 +51,6 @@ const CeramicProvider = ({ children }: CeramicProviderProps) => {
     loadSllEarningsData();
   }, []);
 
-  useEffect(() => {
-    // @ts-ignore
-    if (daiEarningsData && daiEarningsData.content.recipients.length > 0) {
-      // @ts-ignore
-      const paymentsData = daiEarningsData.content.recipients;
-      const daiPaymentTree = new CumulativePaymentTree(paymentsData);
-      const amountForPayee = daiPaymentTree.amountForPayee(
-        "0x4010e200a18FD8756d55105c2F8Fd88DDBD810ce"
-      );
-      console.log(hexToNumberString(amountForPayee));
-
-      // TODO: Get payment cycle number from smart contract
-      const proof = daiPaymentTree.hexProofForPayee(
-        "0x4010e200a18FD8756d55105c2F8Fd88DDBD810ce",
-        1
-      );
-      console.log(proof);
-    }
-  }, [daiEarningsData]);
-
   const getProofForDaiEarnings = (address: string, paymentCycleNumber: number) => {
     let proof = "";
     // @ts-ignore

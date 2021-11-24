@@ -47,6 +47,6 @@ export default createTheme({
           color: "rgb(27, 116, 242)",
         },
       },
-    },
+    }
   },
 });

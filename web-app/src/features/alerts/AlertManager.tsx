@@ -4,27 +4,33 @@ import ToastAlert from "./ToastAlert";
 
 const AlertManager = () => {
   const [alerts, setAlerts]: [
-    { 
-      text: string,
-      severity: "error" | "warning" | "info" | "success",
+    {
+      content: React.ReactNode;
+      severity: "error" | "warning" | "info" | "success";
+      requiresManualDismiss?: boolean;
     }[],
     Function
   ] = useState([]);
   const alertsRef = useRef(alerts);
-  
+
   useEffect(() => {
-    window.addEventListener('addToast', addToast);
-    window.addEventListener('removeToast', removeToast);
-    return () => { 
-      window.removeEventListener('addToast', addToast);
-      window.removeEventListener('removeToast', removeToast);
+    window.addEventListener("addToast", addToast);
+    window.addEventListener("removeToast", removeToast);
+    window.addEventListener("removeAllToasts", removeAllToasts);
+    return () => {
+      window.removeEventListener("addToast", addToast);
+      window.removeEventListener("removeToast", removeToast);
+      window.removeEventListener("removeAllToasts", removeAllToasts);
     };
   }, []);
 
-  const updateAlerts = (data: { 
-    text: string,
-    severity: "error" | "warning" | "info" | "success",
-  }[]) => {
+  const updateAlerts = (
+    data: {
+      content: React.ReactNode;
+      severity: "error" | "warning" | "info" | "success";
+      requiresManualDismiss?: boolean;
+    }[]
+  ) => {
     alertsRef.current = data;
     setAlerts(data);
   };
@@ -36,7 +42,7 @@ const AlertManager = () => {
   };
 
   const removeToast = (event: any) => {
-    const index = event.detail.index
+    const index = event.detail.index;
     if (index > -1 && alertsRef.current.length > 0) {
       const newAlerts = [...alertsRef.current];
       newAlerts.splice(index, 1);
@@ -44,32 +50,35 @@ const AlertManager = () => {
     }
   };
 
+  const removeAllToasts = (event: any) => {
+    updateAlerts([]);
+  };
+
   return (
     <Box
       sx={{
         position: "absolute",
-        display: "inline-flex",
+        display: "flex",
         flexDirection: "column",
         maxWidth: "90%",
         right: 0,
-        bottom: 0,
+        top: 0,
       }}
     >
-      {
-        alerts.map((data, index) => (
-          <ToastAlert 
-            text={data.text}
-            severity={data.severity}
-            index={index}
-            onClick={() => {
-              removeToast({detail: { index }})
-            }}
-          />
-        ))
-      }
+      {alerts.map((data, index) => (
+        <ToastAlert
+          key={index}
+          content={data.content}
+          severity={data.severity}
+          requiresManualDismiss={data.requiresManualDismiss || false}
+          index={index}
+          onClick={() => {
+            removeToast({ detail: { index } });
+          }}
+        />
+      ))}
     </Box>
   );
-}
+};
 
 export default AlertManager;
-

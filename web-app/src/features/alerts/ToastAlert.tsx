@@ -1,40 +1,62 @@
-import { Box, Alert } from "@mui/material";
+import { Box, Button, Alert } from "@mui/material";
 import { useEffect } from "react";
 
 interface Props {
-  text: string;
+  content: React.ReactNode;
   severity: "error" | "warning" | "info" | "success";
   onClick: Function;
   index: number;
-};
+  requiresManualDismiss?: boolean;
+}
 
-const ToastAlert = ({text, severity, onClick, index}: Props) => {
+const ToastAlert = ({
+  content,
+  severity,
+  onClick,
+  index,
+  requiresManualDismiss = false,
+}: Props) => {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('removeToast', { detail: { index } }));
-    }, 3000);
-    return () => clearTimeout(timer);
+    if (!requiresManualDismiss) {
+      const timer = setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent("removeToast", { detail: { index } })
+        );
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   return (
     <Box
+      data-no-blobity
       sx={{
         display: "inline-block",
         minWidth: "200px",
-        margin: '5px',
+        margin: "5px",
         overflow: "hidden",
-        borderRadius: "5px"
+        borderRadius: "5px",
       }}
     >
-      <Alert 
+      <Alert
         severity={severity}
         variant="filled"
-        onClose={() => onClick()}
+        action={
+          <Button
+            data-no-blobity
+            color="inherit"
+            style={{ boxShadow: "none" }}
+            size="small"
+            onClick={() => onClick()}
+          >
+            CLOSE
+          </Button>
+        }
       >
-        {text}
+        {content}
       </Alert>
     </Box>
   );
-}
+};
 
 export default ToastAlert;
