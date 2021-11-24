@@ -49,7 +49,7 @@ export const YourClaimableDai = () => {
           variant="contained"
           disableElevation
           component={Link}
-          to="/claim"
+          to="/claim-dai"
           disabled={!isAuthenticated}
           style={{ margin: "10px 0" }}
         >

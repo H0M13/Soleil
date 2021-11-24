@@ -6,6 +6,7 @@ import { toChecksumAddress } from "web3-utils";
 
 interface ClaimableTokensContextValue {
   claimableDai: string;
+  getUsersProofForDaiEarnings: () => Promise<string>;
 }
 
 const ClaimableTokensContext = createContext<
@@ -21,21 +22,43 @@ const ClaimableTokensProvider = ({
 }: ClaimableTokensProviderProps) => {
   const { contract } = useSoleil();
   const { user } = useMoralis();
-  const { daiEarningsData, getProofForDaiEarnings } = useCeramic();
+  const {
+    daiEarningsData,
+    getProofForDaiEarnings,
+  } = useCeramic();
+
+  const getUsersProofForDaiEarnings = async () => {
+    const daiPaymentCycleNumber = contract
+      ? await contract?.numDaiPaymentCycles()
+      : null;
+
+    const userAddress = user
+      ? toChecksumAddress(user?.attributes.ethAddress)
+      : "";
+
+    let proof = "";
+    // @ts-ignore
+    if (
+      userAddress &&
+      daiPaymentCycleNumber &&
+      daiEarningsData &&
+      daiEarningsData.content.recipients.length > 0
+    ) {
+      // TODO: I think having to -1 here is a bug
+      proof = getProofForDaiEarnings(
+        userAddress,
+        daiPaymentCycleNumber.toNumber() - 1
+      );
+    }
+    return proof;
+  };
 
   const [claimableDai, setClaimableDai] = useState("");
 
   useEffect(() => {
     const getClaimableAmount = async () => {
-      const daiPaymentCycleNumber = await contract?.numDaiPaymentCycles();
-
       const userAddress = toChecksumAddress(user?.attributes.ethAddress);
-
-      // TODO: I think having to -1 here is a bug
-      const proof = getProofForDaiEarnings(
-        userAddress,
-        daiPaymentCycleNumber.toNumber() - 1
-      );
+      const proof = await getUsersProofForDaiEarnings()
 
       const daiBalance = await contract?.daiBalanceForProofWithAddress(
         userAddress,
@@ -59,6 +82,7 @@ const ClaimableTokensProvider = ({
     <ClaimableTokensContext.Provider
       value={{
         claimableDai,
+        getUsersProofForDaiEarnings,
       }}
     >
       {children}

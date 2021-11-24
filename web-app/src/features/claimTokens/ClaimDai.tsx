@@ -1,11 +1,22 @@
 import { useForm, Controller } from "react-hook-form";
 import { Box, Button, TextField, Typography, Theme } from "@mui/material";
 import { useMoralis } from "react-moralis";
-import PleaseConnect from '../pleaseConnect/PleaseConnect';
+import PleaseConnect from "../pleaseConnect/PleaseConnect";
+import { useSoleil } from "../../context/SoleilContext";
+import { useClaimableTokens } from "../../context/ClaimableTokensContext";
+import { ethers } from "ethers";
 
-export const ClaimTokens = () => {
-  const { isAuthenticated } =
-    useMoralis();
+export const ClaimDai = () => {
+  const {
+    useExecuteSoleilFunction,
+  } = useSoleil();
+
+  const { getUsersProofForDaiEarnings } = useClaimableTokens()
+
+  const { data, error, fetch, isFetching, isLoading } =
+    useExecuteSoleilFunction();
+
+  const { isAuthenticated } = useMoralis();
 
   const { handleSubmit, control, reset, formState } = useForm({
     mode: "onChange",
@@ -14,13 +25,26 @@ export const ClaimTokens = () => {
   const { isDirty } = formState;
 
   const onSubmit = async (data: any) => {
-    console.log("Hello");
+    const { amount } = data;
+
+    const asSolidityNum = ethers.utils.parseUnits(amount.toString());
+
+    const proof = await getUsersProofForDaiEarnings()
+
+    await fetch({
+      functionName: "withdrawDai",
+      params: {
+        _value: asSolidityNum,
+        _proof: proof
+      },
+    });
+
+    // TODO:
+    // refreshClaimableDai();
   };
 
   if (!isAuthenticated) {
-    return (
-      <PleaseConnect />
-    );
+    return <PleaseConnect />;
   }
 
   return (
@@ -69,4 +93,4 @@ export const ClaimTokens = () => {
       </Box>
     </form>
   );
-}
+};

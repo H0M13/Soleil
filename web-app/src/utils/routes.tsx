@@ -3,7 +3,7 @@ import Landing from "../features/landing";
 import Dashboard from "../features/dashboard";
 import { RegisterSite } from "../features/registerSite";
 import { SubmitFunds } from "../features/submitFunds";
-import { ClaimTokens } from "../features/claimTokens/ClaimTokens";
+import { ClaimDai } from "../features/claimTokens/ClaimDai";
 
 const AppRoutes = () => (
   <Routes>
@@ -11,7 +11,7 @@ const AppRoutes = () => (
     <Route path="/dashboard" element={<Dashboard />} />
     <Route path="submit-funds" element={<SubmitFunds />} />
     <Route path="register-site" element={<RegisterSite />} />
-    <Route path="claim" element={<ClaimTokens />} />
+    <Route path="claim-dai" element={<ClaimDai />} />
   </Routes>
 )
 
