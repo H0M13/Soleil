@@ -1,12 +1,23 @@
 import ForSiteOwners from "./ForSiteOwners";
 import ForGreenUsers from "./ForGreenUsers";
-import { DaiBalance } from "./DaiBalance";
-import { UsersScheduledDaiPayouts } from "./UsersScheduledDaiPayouts";
 import { LeftStats, RightStats } from "../stats/StatsContainer";
 import { Box, Theme } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
+import { useMoralis } from "react-moralis"
 
 const Landing = () => {
+
+  const { Moralis } = useMoralis()
+
+  useEffect(() => {
+    const getAggregates = async () => {
+      const aggregatesQuery = new Moralis.Query("AggregateSnapshot")
+      const results = await aggregatesQuery.find();
+      console.log(results[0].attributes);
+    }
+    getAggregates()
+  }, [])
+
   return (
     <React.Fragment
     // style={{
