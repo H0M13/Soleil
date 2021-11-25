@@ -5,19 +5,53 @@ import { Box, Theme } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useMoralis } from "react-moralis";
 import Moralis from "moralis";
+import { useContractCall } from "@usedapp/core";
+import { utils } from "ethers";
+import soleilContract from "../../context/soleilContract.json";
 
 const Landing = () => {
-  const { Moralis, isInitialized } = useMoralis();
+  const { Moralis, isInitialized, user } = useMoralis();
 
   const [aggregates, setAggregates] = useState<Moralis.Attributes>();
   useEffect(() => {
     const getAggregates = async () => {
       const aggregatesQuery = new Moralis.Query("AggregateSnapshot");
-      const result = await aggregatesQuery.first();
-      setAggregates(result?.attributes);
+      const results = await aggregatesQuery.find();
+      results.length > 0 &&
+        setAggregates(results[results.length - 1].attributes);
     };
     isInitialized && getAggregates();
   }, [isInitialized]);
+
+  const secondsSinceEpoch = Math.round(new Date().getTime() / 1000);
+  const secondsInDay = 86400;
+  const fullDaysSinceEpoch = Math.floor(secondsSinceEpoch / secondsInDay);
+
+  const rawTodaysScheduledDaiPayout = useContractCall({
+    abi: new utils.Interface(soleilContract.abi),
+    address: soleilContract.address,
+    method: "timestampToDaiToDistribute",
+    args: [(fullDaysSinceEpoch * secondsInDay).toString()],
+  });
+  const todaysScheduledDaiPayout = rawTodaysScheduledDaiPayout && utils.formatEther(rawTodaysScheduledDaiPayout.toString())
+
+  const rawWithdrawnDaiTokens = useContractCall({
+    abi: new utils.Interface(soleilContract.abi),
+    address: soleilContract.address,
+    method: "withdrawnDaiTokens",
+    args: [],
+  });
+  const withdrawnDaiTokens = rawWithdrawnDaiTokens && utils.formatEther(rawWithdrawnDaiTokens.toString())
+
+  const rawWithdrawnSllTokens = useContractCall({
+    abi: new utils.Interface(soleilContract.abi),
+    address: soleilContract.address,
+    method: "withdrawnSllTokens",
+    args: [],
+  });
+  const withdrawnSllTokens = rawWithdrawnSllTokens && utils.formatEther(rawWithdrawnSllTokens.toString())
+
+  const stats = { aggregates, todaysScheduledDaiPayout, withdrawnDaiTokens, withdrawnSllTokens }
 
   return (
     <Box
@@ -28,7 +62,7 @@ const Landing = () => {
         width: "100%",
       }}
     >
-      <LeftStats stats={aggregates} />
+      <LeftStats stats={stats} />
       <Box
         sx={{
           display: "flex",
@@ -44,7 +78,7 @@ const Landing = () => {
         <ForGreenUsers />
         <ForSiteOwners />
       </Box>
-      <RightStats stats={aggregates} />
+      <RightStats stats={stats} />
     </Box>
   );
 };

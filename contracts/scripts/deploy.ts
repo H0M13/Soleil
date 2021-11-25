@@ -33,6 +33,13 @@ async function main() {
   await poolManagerContract.deployed();
 
   console.log("Soleil Pool Manager contract deployed to:", poolManagerContract.address);
+
+  await soleilTokenContract.grantRole(
+    await soleilTokenContract.MINTER_ROLE(),
+    poolManagerContract.address
+  );
+
+  console.log("Minter role granted to pool manager contract");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
