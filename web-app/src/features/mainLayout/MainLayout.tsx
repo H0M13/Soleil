@@ -80,7 +80,7 @@ export const MainLayout = () => {
             "content content content"
             `,
             gridTemplateColumns: "300px auto 200px",
-            gridTemplateRows: "300px auto",
+            gridTemplateRows: "150px auto",
           }}
         >
           <Box
@@ -88,7 +88,7 @@ export const MainLayout = () => {
               gridArea: "logo",
               display: "flex",
               justifyContent: "center",
-              alignItems: "center",
+              alignItems: "flex-start",
             }}
           >
             <Link to="/" data-blobity-radius="130">

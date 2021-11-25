@@ -1,0 +1,27 @@
+.howTo {
+  display: flex;
+  flex-direction: column;
+}
+
+.howToRow {
+  display: flex;
+  flex-direction: row;
+  margin: 5px 0;
+}
+
+.howToNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  box-sizing: border-box;
+  border: solid 2px rgb(27, 116, 242);
+  color: rgb(27, 116, 242);
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  margin-right: 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
