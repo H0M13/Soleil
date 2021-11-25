@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useClaimableTokens } from "../../context/ClaimableTokensContext";
-import { utils, BigNumber } from "ethers";
+import { utils, BigNumber, ethers } from "ethers";
 import {
   Box,
   Button,
@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import { useMoralis } from "react-moralis";
 import { useSoleil } from "../../context/SoleilContext";
-import { ethers } from "ethers";
 import { useForm, Controller } from "react-hook-form";
 
 export const YourClaimableSll = () => {
