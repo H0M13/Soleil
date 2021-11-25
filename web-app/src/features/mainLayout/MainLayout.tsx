@@ -100,13 +100,12 @@ export const MainLayout = () => {
           </Box>
           <Box sx={{ gridArea: "content" }}>
             <Container
+              maxWidth="xl"
               sx={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                maxWidth: "10000px !important",
-                height: "100%",
               }}
             >
               <AppRoutes />

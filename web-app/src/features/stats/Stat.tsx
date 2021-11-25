@@ -1,14 +1,13 @@
 import { Card, CardContent, Typography } from "@mui/material";
 
 interface Props {
-  value: number;
+  value: number | string;
   header: string;
 };
 
 const Stat = ({value, header}: Props) => {
   return (
     <Card sx={{ 
-        width: 130,
         margin: '10px 0',
         backgroundColor: 'rgb(27, 116, 242)',
         color: 'white'

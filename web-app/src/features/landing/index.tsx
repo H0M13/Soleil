@@ -2,57 +2,50 @@ import ForSiteOwners from "./ForSiteOwners";
 import ForGreenUsers from "./ForGreenUsers";
 import { LeftStats, RightStats } from "../stats/StatsContainer";
 import { Box, Theme } from "@mui/material";
-import React, { useEffect } from "react";
-import { useMoralis } from "react-moralis"
+import React, { useEffect, useState } from "react";
+import { useMoralis } from "react-moralis";
+import Moralis from "moralis";
 
 const Landing = () => {
+  const { Moralis, isInitialized } = useMoralis();
 
-  const { Moralis } = useMoralis()
-
+  const [aggregates, setAggregates] = useState<Moralis.Attributes>();
   useEffect(() => {
     const getAggregates = async () => {
-      const aggregatesQuery = new Moralis.Query("AggregateSnapshot")
-      const results = await aggregatesQuery.find();
-      console.log(results[0].attributes);
-    }
-    getAggregates()
-  }, [])
+      const aggregatesQuery = new Moralis.Query("AggregateSnapshot");
+      const result = await aggregatesQuery.first();
+      setAggregates(result?.attributes);
+    };
+    isInitialized && getAggregates();
+  }, [isInitialized]);
 
   return (
-    <React.Fragment
-    // style={{
-    //   backgroundColor: 'purple',
-    //   height: '100%',
-    //   width: '100%'
-    // }}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        width: "100%",
+      }}
     >
-      {/* <DaiBalance /> */}
-      {/* <UsersScheduledDaiPayouts /> */}
+      <LeftStats stats={aggregates} />
       <Box
         sx={{
           display: "flex",
-          width: "100%",
+          flexWrap: "wrap",
+          gap: (theme: Theme) => theme.spacing(4),
+          justifyContent: "space-around",
+          my: {
+            xs: 2,
+            md: 4,
+          },
         }}
       >
-        <LeftStats />
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: (theme: Theme) => theme.spacing(4),
-            justifyContent: "space-around",
-            my: {
-              xs: 2,
-              md: 4,
-            },
-          }}
-        >
-          <ForGreenUsers />
-          <ForSiteOwners />
-        </Box>
-        <RightStats />
+        <ForGreenUsers />
+        <ForSiteOwners />
       </Box>
-    </React.Fragment>
+      <RightStats stats={aggregates} />
+    </Box>
   );
 };
 
