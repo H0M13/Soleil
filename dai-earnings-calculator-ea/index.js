@@ -17,6 +17,7 @@ const CumulativePaymentTree = require("./cumulative-payment-tree.js");
 const poolManagerContract = require("./poolManagerContract.json");
 const { ethers, BigNumber } = require("ethers");
 const web3Utils = require("web3-utils");
+const { MultiCall } = require("@indexed-finance/multicall");
 
 const createRequest = async (input, callback) => {
   return performRequest({
@@ -25,15 +26,26 @@ const createRequest = async (input, callback) => {
   });
 };
 
-const connectToContract = () => {
+const getDailyDaiRewards = async ({
+  totalEnergyProducedPerDay,
+  daysSearchedAsUnixTimestamps,
+}) => {
   const { address, abi } = poolManagerContract;
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-  return new ethers.Contract(address, abi, provider);
-};
+  const multi = new MultiCall(provider);
+  const multicallInputs = [];
+  totalEnergyProducedPerDay.forEach((day, dayIndex) => {
+    multicallInputs.push({
+      target: address,
+      function: "timestampToDaiToDistribute",
+      args: [daysSearchedAsUnixTimestamps[dayIndex]],
+    });
+  });
 
-const getDaiPayoutForDayWithTimestamp = async ({ timestamp, contract }) => {
-  const result = await contract.timestampToDaiToDistribute(timestamp);
-  return result;
+  const dailyDaiRewards = await multi.multiCall(abi, multicallInputs);
+
+  // [0] is the block number, [1] is the data
+  return dailyDaiRewards[1];
 };
 
 const performRequest = async ({ input, callback }) => {
@@ -97,38 +109,18 @@ const performRequest = async ({ input, callback }) => {
     });
   });
 
-  console.log(totalEnergyProducedPerDay);
-  console.log(energyProducedBySitePerDay);
-
   const daysSearchedAsUnixTimestamps = daysToSearch.map((day) =>
     getUnixTime(new Date(day))
   );
-  const contract = connectToContract();
 
-  // TODO: Ideally these should use multicall
-  const dailyRewardsPromises = energyProducedBySitePerDay.map((day, dayIndex) =>
-    getDaiPayoutForDayWithTimestamp({
-      timestamp: daysSearchedAsUnixTimestamps[dayIndex],
-      contract,
-    })
-  );
-
-  const DELAY_PER_REQUEST = 1000;
-  const appendDelayToPromise = (promise, delayInMs) =>
-    promise.then(
-      (value) =>
-        new Promise((resolve) => setTimeout(() => resolve(value), delayInMs))
-    );
-
-  const requestsWithDelay = dailyRewardsPromises.map((promise, index) =>
-    appendDelayToPromise(promise, index * DELAY_PER_REQUEST)
-  );
-
-  const dailyRewards = await Promise.all(requestsWithDelay);
+  const dailyDaiRewards = await getDailyDaiRewards({
+    totalEnergyProducedPerDay,
+    daysSearchedAsUnixTimestamps,
+  });
 
   let cumulativeDaiEarningsBySite = {};
   energyProducedBySitePerDay.forEach(async (day, dayIndex) => {
-    const dailyDaiReward = dailyRewards[dayIndex];
+    const dailyDaiReward = dailyDaiRewards[dayIndex];
 
     for (var key in day) {
       if (day.hasOwnProperty(key)) {
@@ -159,9 +151,6 @@ const performRequest = async ({ input, callback }) => {
     }
   }
 
-  console.log("cumulativeDaiEarningsBySiteAsArray");
-  console.log(cumulativeDaiEarningsBySiteAsArray);
-
   const withEarningsAsHexString = cumulativeDaiEarningsBySiteAsArray.map(
     (item) => ({
       address: item.address,
@@ -185,9 +174,9 @@ const performRequest = async ({ input, callback }) => {
   if (withEarningsAsHexString.length > 0) {
     // Generate merkle root for earnings
     let paymentTree = new CumulativePaymentTree(withEarningsAsHexString);
-    console.log(paymentTree.getHexRoot());
     root = paymentTree.getHexRoot();
   }
+  console.log(root);
 
   callback(
     200,

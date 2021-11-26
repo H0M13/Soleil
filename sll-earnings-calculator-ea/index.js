@@ -18,6 +18,7 @@ const poolManagerContract = require("./poolManagerContract.json");
 const { ethers, BigNumber } = require("ethers");
 const Moralis = require("moralis/node");
 const web3Utils = require("web3-utils");
+const { MultiCall } = require("@indexed-finance/multicall");
 
 const createRequest = async (input, callback) => {
   return performRequest({
@@ -26,27 +27,65 @@ const createRequest = async (input, callback) => {
   });
 };
 
-const connectToContract = () => {
+const getDailyDaiRewards = async ({
+  totalEnergyProducedPerDay,
+  daysSearchedAsUnixTimestamps,
+}) => {
   const { address, abi } = poolManagerContract;
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-  return new ethers.Contract(address, abi, provider);
+  const multi = new MultiCall(provider);
+  const multicallInputs = [];
+  totalEnergyProducedPerDay.forEach((day, dayIndex) => {
+    multicallInputs.push({
+      target: address,
+      function: "timestampToDaiToDistribute",
+      args: [daysSearchedAsUnixTimestamps[dayIndex]],
+    });
+  });
+
+  const dailyDaiRewards = await multi.multiCall(abi, multicallInputs);
+
+  // [0] is the block number, [1] is the data
+  return dailyDaiRewards[1];
 };
 
-const getDaiPayoutForDayWithTimestamp = async ({ timestamp, contract }) => {
-  const result = await contract.timestampToDaiToDistribute(timestamp);
-  return result;
-};
-
-const getUsersDaiDistributionsForDayWithTimestamp = async ({
-  ethAddress,
-  timestamp,
-  contract,
+const getUsersDailyDaiDistributions = async ({
+  totalEnergyProducedPerDay,
+  usersEthAddresses,
+  daysSearchedAsUnixTimestamps,
 }) => {
-  const result = await contract.addressToTimestampToDaiToDistribute(
-    ethAddress,
-    timestamp
-  );
-  return result;
+  const { address, abi } = poolManagerContract;
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+  const multi = new MultiCall(provider);
+  const multicallInputs = [];
+  totalEnergyProducedPerDay.forEach((day, dayIndex) => {
+    usersEthAddresses.forEach((ethAddress) => {
+      const timestamp = daysSearchedAsUnixTimestamps[dayIndex];
+      multicallInputs.push({
+        target: address,
+        function: "addressToTimestampToDaiToDistribute",
+        args: [ethAddress, timestamp],
+      });
+    });
+  });
+
+  const rawResults = await multi.multiCall(abi, multicallInputs);
+
+  const results = [];
+  totalEnergyProducedPerDay.forEach((day, dayIndex) => {
+    usersEthAddresses.forEach((ethAddress, addressIndex) => {
+      const timestamp = daysSearchedAsUnixTimestamps[dayIndex];
+      results.push({
+        ethAddress,
+        timestamp,
+        daiDistribution:
+          // [0] is the block number, [1] is the data
+          rawResults[1][usersEthAddresses.length * dayIndex + addressIndex],
+      });
+    });
+  });
+
+  return results;
 };
 
 const performRequest = async ({ input, callback }) => {
@@ -80,8 +119,8 @@ const performRequest = async ({ input, callback }) => {
   // Auth
   const seed = fromString(process.env.SEED, "base16");
 
-  const provider = new Ed25519Provider(seed);
-  ceramic.did.setProvider(provider);
+  const ceramicProvider = new Ed25519Provider(seed);
+  ceramic.did.setProvider(ceramicProvider);
   await ceramic.did.authenticate();
 
   const dataFeedDoc = await ceramic.loadStream(energyDataStreamId);
@@ -115,71 +154,22 @@ const performRequest = async ({ input, callback }) => {
   const daysSearchedAsUnixTimestamps = daysToSearch.map((day) =>
     getUnixTime(new Date(day))
   );
-  const contract = connectToContract();
 
-  // TODO: Ideally these should use multicall
-  const dailyDaiRewardsPromises = totalEnergyProducedPerDay.map(
-    (day, dayIndex) =>
-      getDaiPayoutForDayWithTimestamp({
-        timestamp: daysSearchedAsUnixTimestamps[dayIndex],
-        contract,
-      })
-  );
-
-  const DELAY_PER_REQUEST = 200;
-  const appendDelayToPromise = (promise, delayInMs) =>
-    promise.then(
-      (value) =>
-        new Promise((resolve) => setTimeout(() => resolve(value), delayInMs))
-    );
-
-  const totalDistributionsRequestsWithDelay = dailyDaiRewardsPromises.map(
-    (promise, index) => appendDelayToPromise(promise, index * DELAY_PER_REQUEST)
-  );
-
-  const dailyDaiRewards = await Promise.all(
-    totalDistributionsRequestsWithDelay
-  );
-
-  console.log(dailyDaiRewards);
-
-  // TODO: These should use multicall
-  let usersDailyDaiDistributionsPromises = [];
-  totalEnergyProducedPerDay.forEach((day, dayIndex) => {
-    usersEthAddresses.forEach((ethAddress) => {
-      const timestamp = daysSearchedAsUnixTimestamps[dayIndex];
-      usersDailyDaiDistributionsPromises.push(
-        getUsersDaiDistributionsForDayWithTimestamp({
-          ethAddress,
-          timestamp,
-          contract,
-        }).then((daiDistribution) => {
-          return {
-            ethAddress,
-            daiDistribution,
-            timestamp,
-          };
-        })
-      );
-    });
+  const dailyDaiRewards = await getDailyDaiRewards({
+    totalEnergyProducedPerDay,
+    daysSearchedAsUnixTimestamps,
   });
 
-  const usersDistributionsRequestsWithDelay =
-    usersDailyDaiDistributionsPromises.map((promise, index) =>
-      appendDelayToPromise(promise, index * DELAY_PER_REQUEST)
-    );
-
-  const usersDailyDistributions = await Promise.all(
-    usersDistributionsRequestsWithDelay
-  );
-
-  console.log(usersDailyDistributions);
+  const usersDailyDaiDistributions = await getUsersDailyDaiDistributions({
+    totalEnergyProducedPerDay,
+    usersEthAddresses,
+    daysSearchedAsUnixTimestamps,
+  });
 
   let cumulativeSllEarningsByUserAsArray = [];
-  usersDailyDistributions.forEach((dailyDistribution) => {
+  usersDailyDaiDistributions.forEach((dailyDistribution) => {
     if (!dailyDistribution.daiDistribution.isZero()) {
-      // The user's earned SLL equal (their daily DAI distribution * total energy generated for that day) / (1000 * total daily DAI distribution)
-
+      // The user's earned SLL equals (their daily DAI distribution * total energy generated for that day) / (1000 * total daily DAI distribution)
       const dayIndex = daysSearchedAsUnixTimestamps.indexOf(
         dailyDistribution.timestamp
       );
@@ -238,6 +228,7 @@ const performRequest = async ({ input, callback }) => {
 
     root = paymentTree.getHexRoot();
   }
+  console.log(root);
 
   callback(
     200,
