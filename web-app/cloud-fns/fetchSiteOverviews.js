@@ -1,3 +1,5 @@
+// This cloud job is not used anymore and can be removed
+
 Moralis.Cloud.job("fetchSiteOverviews", (request) => {
   // params: passed in the job call
   // headers: from the request that triggered the job
