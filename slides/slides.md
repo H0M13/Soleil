@@ -70,9 +70,9 @@ Ceramic provides a way for us to store a decentralised data stream on top of IPF
 
 ---
 
-Mutable off-chain data not well suited to a lot of blockchain applications but works very well for this use case.
+Unlike using IPFS directly, using a Ceramic data stream allows us to point to mutable data with a single address. Streams are built up from of a series of immutable commits.
 
-Soleil uses Chainlink nodes to store three data feeds on Ceramic:
+Soleil uses Chainlink nodes to store three data feeds as streams on Ceramic:
 
 - Energy generated per site
 - Cumulative DAI earnings per site
@@ -80,9 +80,29 @@ Soleil uses Chainlink nodes to store three data feeds on Ceramic:
 
 ---
 
+## Gas efficient payments
+
+---
+
+Submitting transactions to reward every user with DAI and SLL would use a lot of gas and not allow the platform to scale.
+
+=> Look to a 'cumulative merkle drop' solution
+
+---
+
+<img src="merkle-tree.png" style="background:#fff; border:none; box-shadow: none; height: 250px" />
+
 Merkle trees are used to facilitate payments of DAI and SLL.
 
-Chainlink nodes calculate the merkle root of the cumulative earnings/rewards feeds and post to Soleil pool manager contract.
+Two custom Chainlink external adapters calculate the merkle root of the cumulative earnings/rewards feeds and submit them to Soleil pool manager contract.
+
+---
+
+<img src="claim-form.png" style="background:#fff; border:none; box-shadow: none; height: 250px" />
+
+Soleil web app looks at our Ceramic data streams to notify the user of how many claimable tokens are available to them.
+
+Also allows them to easily generate a merkle proof against the latest merkle root to submit to the Pool Manager contract to claim their tokens.
 
 ---
 
