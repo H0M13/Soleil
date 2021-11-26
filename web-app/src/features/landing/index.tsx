@@ -7,7 +7,7 @@ import { useMoralis } from "react-moralis";
 import Moralis from "moralis";
 import { useContractCall } from "@usedapp/core";
 import { utils } from "ethers";
-import soleilContract from "../../context/soleilContract.json";
+import soleilContract from "../../poolManagerContract.json";
 
 const Landing = () => {
   const { Moralis, isInitialized, user } = useMoralis();

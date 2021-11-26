@@ -1,6 +1,6 @@
 import { useMoralis } from "react-moralis";
 import { useContractCalls } from "@usedapp/core";
-import soleilContract from "../../context/soleilContract.json";
+import soleilContract from "../../poolManagerContract.json";
 import { utils } from "ethers";
 
 export const UsersScheduledDaiPayouts = () => {

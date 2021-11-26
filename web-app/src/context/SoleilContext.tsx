@@ -4,8 +4,8 @@ import {
   useWeb3ExecuteFunction,
   Web3ExecuteFunctionParameters,
 } from "react-moralis";
-import poolManagerContractJson from "./soleilContract.json";
-import daiContractJson from "./daiContract.json";
+import poolManagerContractJson from "../poolManagerContract.json";
+import daiContractJson from "../daiContract.json";
 import { AbiItem } from "web3-utils";
 import { Contract, ethers } from "ethers";
 
