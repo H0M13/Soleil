@@ -134,8 +134,8 @@ contract PoolManager is Ownable {
     }
 
     /// @notice A dev function to allow withdrawal of test DAI from the contract. Preferably not required in production version of this contract
-    /// @param The amount of DAI to withdraw
-    /// @param The address to send the DAI to
+    /// @param _value The amount of DAI to withdraw
+    /// @param _recipient The address to send the DAI to
     function masterWithdrawDai(uint _value, address _recipient) onlyOwner public returns(bool) {
       require(daiToken.balanceOf(address(this)) >= _value, "The PoolManager does not have enough DAI to make this withdrawal.");
       daiToken.transferFrom(address(this), _recipient, _value);
