@@ -12,6 +12,7 @@ import useBlobity from "blobity/lib/useBlobity";
 import themeOptions from "./theme";
 import AlertManager from "../alerts/AlertManager";
 import { Logo } from "../header/Logo";
+import { PoweredBy } from "../footer"
 import { Link } from "react-router-dom";
 import { ClaimableTokensProvider } from "../../context/ClaimableTokensContext";
 import { useMoralis } from "react-moralis";
@@ -32,7 +33,7 @@ export const MainLayout = () => {
   useEffect(() => {
     const checkChainId = async () => {
       const rinkebyChainId = 4
-      const chainId = (await web3?.eth.net.getId()) || { chainId: null };
+      const chainId = (await web3 ?.eth.net.getId()) || { chainId: null };
       if (chainId && chainId !== rinkebyChainId) {
         window.dispatchEvent(
           new CustomEvent("addToast", {
@@ -78,9 +79,10 @@ export const MainLayout = () => {
             gridTemplateAreas: `
             "logo header ."
             "content content content"
+            "footer footer footer"
             `,
             gridTemplateColumns: "300px auto 200px",
-            gridTemplateRows: "200px auto",
+            gridTemplateRows: "200px auto 150px",
           }}
         >
           <Box
@@ -111,6 +113,16 @@ export const MainLayout = () => {
               <AppRoutes />
             </Container>
             <AlertManager />
+          </Box>
+          <Box
+            sx={{
+              gridArea: "footer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
+          >
+            <PoweredBy />
           </Box>
         </Box>
       </ThemeProvider>
