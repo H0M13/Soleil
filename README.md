@@ -23,8 +23,9 @@
 <img src="https://user-images.githubusercontent.com/6655367/143720677-540b59af-1c7e-4e40-8fd4-d9d13dc0fa71.png"/>
 
 1. Create a Moralis server instance.
-1. Set `REACT_APP_MORALIS_APPLICATION_ID` and `REACT_APP_MORALIS_SERVER_URL` environment variables for /web-app and /ceramic-soleil-data-feed-ea.
-1. Set `REACT_APP_CERAMIC_API_URL` and `REACT_APP_RPC_URL` environment variables for /web-app with a Ceramic node/gateway url on the Clay testnet.
+1. Set `REACT_APP_MORALIS_APPLICATION_ID` and `REACT_APP_MORALIS_SERVER_URL` environment variables with details from the Moralis server instance.
+1. Set the `REACT_APP_CERAMIC_API_URL` environment variables for /web-app with a Ceramic node/gateway url on the Clay testnet.
+1. Set the `REACT_APP_RPC_URL` environment variable to your Rinkeby RPC node url.
 1. Run `yarn install && yarn start`.
 
 ## Ceramic-soleil-data-feed-ea
@@ -33,9 +34,9 @@ This external adapter populates the energy production data stream on Ceramic. To
 
 Deploy this external adapter if you want to populate your own Ceramic data stream with energy data from solar sites which register in your Moralis database through your web app. To do so:
 
-1. Generate a [seed](https://developers.ceramic.network/authentication/key-did/provider/#3-get-seed-for-did) for your Ceramic authentication. Set the `SEED` environment variable to this seed.
+1. Either [generate a seed](https://developers.ceramic.network/authentication/key-did/provider/#3-get-seed-for-did) or use an existing seed for your Ceramic authentication. Set the `SEED` environment variable to this seed.
 1. Set the `CERAMIC_API_URL` environment variable with a read/write node on the Ceramic Clay testnet.
-1. Remember to set `REACT_APP_MORALIS_APPLICATION_ID` and `REACT_APP_MORALIS_SERVER_URL` if not already done.
+1. Set `MORALIS_APPLICATION_ID` and `MORALIS_SERVER_URL` environment variables with details your Moralis server instance.
 1. Run `npm run bootstrap` to pin the bootstrap your Ceramic schema and data streams. Stream IDs will be written to `config.json` files in all projects which need them.
 1. [Deploy the adapter to a cloud hosting solution](https://chainlinkadapters.com/guides/run-external-adapter-on-gcp) or run it locally.
 1. [Create a bridge between your Chainlink node and the external adapter](https://docs.chain.link/docs/node-operators/)
@@ -59,6 +60,11 @@ This process is currently centralised and would need to be decentralised between
 
 This external adapter reads total daily DAI distribution data from the pool manager smart contract and energy production data from the Ceramic data stream. It is then able to calculate how much DAI each solar site has earned and publishes this data to the cumulative DAI earnings Ceramic data stream. The merkle root of this cumulative earnings data is then returned to the Chainlink node to be submitted to the pool manager contract. Multicall is used to reduce the number of calls made to the RPC node.
 
+1. Either [generate a seed](https://developers.ceramic.network/authentication/key-did/provider/#3-get-seed-for-did) or use an existing seed for your Ceramic authentication. Set the `SEED` environment variable to this seed.
+1. Set the `CERAMIC_API_URL` environment variable with a read/write node on the Ceramic Clay testnet.
+1. Set the `RPC_URL` environment variable to your Rinkeby RPC node url.
+1. [Deploy the adapter to a cloud hosting solution](https://chainlinkadapters.com/guides/run-external-adapter-on-gcp) or run it locally.
+1. [Create a bridge between your Chainlink node and the external adapter](https://docs.chain.link/docs/node-operators/)
 1. Create a CRON job for the adapter. Here's an example:
 
 ```
@@ -84,6 +90,12 @@ This external adapter reads daily scheduled DAI distribution data from the pool 
 
 The SLL rewards data is then published to the cumulative SLL earnings data stream. The merkle root of this data is then returned to the Chainlink node to be submitted to the pool manager contract. Multicall is used to reduce the number of calls made to the RPC node.
 
+1. Either [generate a seed](https://developers.ceramic.network/authentication/key-did/provider/#3-get-seed-for-did) or use an existing seed for your Ceramic authentication. Set the `SEED` environment variable to this seed.
+1. Set the `CERAMIC_API_URL` environment variable with a read/write node on the Ceramic Clay testnet.
+1. Set the `RPC_URL` environment variable to your Rinkeby RPC node url.
+1. Set `MORALIS_APPLICATION_ID`, `MORALIS_SERVER_URL` and `MORALIS_MASTER_KEY` environment variables with details your Moralis server instance.
+1. [Deploy the adapter to a cloud hosting solution](https://chainlinkadapters.com/guides/run-external-adapter-on-gcp) or run it locally.
+1. [Create a bridge between your Chainlink node and the external adapter](https://docs.chain.link/docs/node-operators/)
 1. Create a CRON job for the adapter. Here's an example:
 
 ```
