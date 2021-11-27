@@ -20,6 +20,8 @@
 
 ## Web-app
 
+<img src="https://user-images.githubusercontent.com/6655367/143720677-540b59af-1c7e-4e40-8fd4-d9d13dc0fa71.png"/>
+
 1. Create a Moralis server instance.
 1. Set `REACT_APP_MORALIS_APPLICATION_ID` and `REACT_APP_MORALIS_SERVER_URL` environment variables for /web-app and /ceramic-soleil-data-feed-ea.
 1. Set `REACT_APP_CERAMIC_API_URL` and `REACT_APP_RPC_URL` environment variables for /web-app with a Ceramic node/gateway url on the Clay testnet.
