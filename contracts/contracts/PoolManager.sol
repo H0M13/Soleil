@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
 import './SoleilToken.sol';
 
+/// @title Soleil pool manager contract
+/// @dev Alpha - do not use in production
 contract PoolManager is Ownable {
 
     using SafeMath for uint256;
@@ -38,6 +40,10 @@ contract PoolManager is Ownable {
     event Withdraw(address indexed recipient, uint value, string ticker);
     event DaiPayoutScheduleSet(uint256 amount, uint256 numOfDays);
 
+    /// @param _sllTokenAddress The address of the deployed SLL token contract
+    /// @param _daiTokenAddress The address of the DAI token contract
+    /// @param _chainlinkNodeAddress The address of the Chainlink node which is permitted to submit merkle roots to this contract
+    /// @dev To decentralise the submission of merkle roots an array of Chainlink nodes may need to be permitted going forward
     constructor(address _sllTokenAddress, address _daiTokenAddress, address _chainlinkNodeAddress) {
         sllToken = SoleilToken(_sllTokenAddress);
         daiToken = IERC20(_daiTokenAddress);
@@ -46,6 +52,9 @@ contract PoolManager is Ownable {
         currentSllPaymentCycleStartBlock = block.number;
     }
 
+    /// @notice After approving this contract to spend the user's DAI, call this function to set a distribution schedule for the DAI, for up to 100 days from now
+    /// @param _amount The amount of DAI to be included in the distribution schedule
+    /// @param _numOfDays The number of days from now to distribute the DAI to solar sites over 
     function setDaiPayoutSchedule(uint256 _amount, uint256 _numOfDays) public returns(bool) {
         require(_numOfDays <= 100, "100 days maximum schedule length exceeded.");
         uint256 allowance = daiToken.allowance(msg.sender, address(this));
@@ -63,11 +72,14 @@ contract PoolManager is Ownable {
         return true;
     }
 
+    /// @notice Only permit the Chainlink node regsitered in the contract constructor to call a function with this modifier
     modifier onlyChainlinkNode() {
         require(chainlinkNodeAddress == msg.sender,'Only Chainlink node can call this function');
         _;
     }
 
+    /// @notice Submit a merkle root for the SLL earnings data. Begins a new SLL payment cycle
+    /// @param _root The merkle root
     function submitSllMerkleRoot(bytes32 _root) public onlyChainlinkNode returns(bool) {
         sllRoots[numSllPaymentCycles] = _root;
 
@@ -76,6 +88,8 @@ contract PoolManager is Ownable {
         return true;
     }
 
+    /// @notice Submit a merkle root for the DAI earnings data. Begins a new DAI payment cycle
+    /// @param _root The merkle root
     function submitDaiMerkleRoot(bytes32 _root) public onlyChainlinkNode returns(bool) {
         daiRoots[numDaiPaymentCycles] = _root;
 
@@ -84,6 +98,9 @@ contract PoolManager is Ownable {
         return true;
     }
 
+    /// @notice Claim SLL tokens by submitting an amount and a merkle proof. Allows for claims of partial claimable amounts. SLL tokens are minted by this contract
+    /// @param _value The amount of SLL this claim is for
+    /// @param _proof A merkle proof to be verified against the contract's latest SLL merkle root
     function withdrawSll(uint256 _value, bytes memory _proof) public {
         require(_value != 0, "The withdraw amount must not be zero.");
 
@@ -98,6 +115,9 @@ contract PoolManager is Ownable {
         emit Withdraw(msg.sender, _value, 'SLL');
     }
 
+    // @notice Claim DAI by submitting an amount and a merkle proof. Allows for claim of partial claimable amounts
+    /// @param _value The amount of DAI this claim is for
+    /// @param _proof A merkle proof to be verified against the contract's latest DAI merkle root
     function withdrawDai(uint256 _value, bytes memory _proof) public {
         require(_value != 0, "The withdraw amount must not be zero.");
         require(daiToken.balanceOf(address(this)) >= _value, "The PoolManager does not have enough DAI to make this withdrawal.");
@@ -113,20 +133,32 @@ contract PoolManager is Ownable {
         emit Withdraw(msg.sender, _value, 'DAI');
     }
 
+    /// @notice A dev function to allow withdrawal of test DAI from the contract. Preferably not required in production version of this contract
+    /// @param The amount of DAI to withdraw
+    /// @param The address to send the DAI to
     function masterWithdrawDai(uint _value, address _recipient) onlyOwner public returns(bool) {
       require(daiToken.balanceOf(address(this)) >= _value, "The PoolManager does not have enough DAI to make this withdrawal.");
       daiToken.transferFrom(address(this), _recipient, _value);
       return true;
     }
 
+    /// @notice Fetch the claimable DAI for a merkle proof
+    /// @param _proof The merkle proof
+    /// @dev The claimable amount is equal to the amount in the cumulative earnings data stream minus the amount already claimed by the user
+    /// @return The claimable amount of DAI
     function daiBalanceForProof(bytes memory _proof) public view returns(uint256) {
         return daiBalanceForProofWithAddress(msg.sender, _proof);
     }
 
+    /// @notice Fetch the claimable SLL for a merkle proof
+    /// @param _proof The merkle proof
+    /// @dev The claimable amount is equal to the amount in the cumulative earnings data stream minus the amount already claimed by the user
+    /// @return The claimable amount of SLL
     function sllBalanceForProof(bytes memory _proof) public view returns(uint256) {
         return sllBalanceForProofWithAddress(msg.sender, _proof);
     }
 
+    /// @notice Start a new DAI payment cycle
     function startNewDaiPaymentCycle() internal onlyChainlinkNode returns(bool) {
         require(block.number > currentDaiPaymentCycleStartBlock);
 
@@ -138,6 +170,7 @@ contract PoolManager is Ownable {
         return true;
     } 
 
+    /// @notice Start a new SLL payment cycle
     function startNewSllPaymentCycle() internal onlyChainlinkNode returns(bool) {
         require(block.number > currentSllPaymentCycleStartBlock);
 
@@ -149,6 +182,7 @@ contract PoolManager is Ownable {
         return true;
     } 
 
+    
     function daiBalanceForProofWithAddress(address _address, bytes memory proof) public view returns(uint256) {
         bytes32[] memory meta;
         bytes32[] memory _proof;
