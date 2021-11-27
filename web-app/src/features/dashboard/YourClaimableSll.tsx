@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useClaimableTokens } from "../../context/ClaimableTokensContext";
 import { utils, BigNumber, ethers } from "ethers";
 import {
@@ -22,6 +22,32 @@ export const YourClaimableSll = () => {
 
   const { data, error, fetch, isFetching, isLoading } =
     useExecuteSoleilFunction();
+
+  useEffect(() => {
+    if (error !== null) {
+      window.dispatchEvent(
+        new CustomEvent("addToast", {
+          detail: {
+            content: "An error occurred",
+            severity: "error",
+            requiresManualDismiss: false,
+          },
+        })
+      )
+    }
+
+    if (data !== null) {
+      window.dispatchEvent(
+        new CustomEvent("addToast", {
+          detail: {
+            content: "SLL claimed successfully",
+            severity: "success",
+            requiresManualDismiss: false,
+          },
+        })
+      )
+    }
+  }, [data, error])
 
   const formattedAmount = claimableSll
     ? utils.formatEther(BigNumber.from(claimableSll))
@@ -136,7 +162,7 @@ export const YourClaimableSll = () => {
             onClick={toggleIsClaiming}
             style={{ margin: "10px 0" }}
             disabled={
-              claimableSll === undefined || parseFloat(claimableSll) <= 0
+              claimableSll === undefined || parseFloat(claimableSll) <= 0 || isLoading
             }
           >
             Claim Tokens
