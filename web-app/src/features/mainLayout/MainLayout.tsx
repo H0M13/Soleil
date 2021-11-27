@@ -80,7 +80,7 @@ export const MainLayout = () => {
             "content content content"
             `,
             gridTemplateColumns: "300px auto 200px",
-            gridTemplateRows: "150px auto",
+            gridTemplateRows: "200px auto",
           }}
         >
           <Box
