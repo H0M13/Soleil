@@ -115,7 +115,7 @@ contract PoolManager is Ownable {
         emit Withdraw(msg.sender, _value, 'SLL');
     }
 
-    // @notice Claim DAI by submitting an amount and a merkle proof. Allows for claim of partial claimable amounts
+    /// @notice Claim DAI by submitting an amount and a merkle proof. Allows for claim of partial claimable amounts
     /// @param _value The amount of DAI this claim is for
     /// @param _proof A merkle proof to be verified against the contract's latest DAI merkle root
     function withdrawDai(uint256 _value, bytes memory _proof) public {
@@ -142,7 +142,7 @@ contract PoolManager is Ownable {
       return true;
     }
 
-    /// @notice Fetch the claimable DAI for a merkle proof
+    /// @notice Fetch the claimable DAI for the msg sender with a merkle proof
     /// @param _proof The merkle proof
     /// @dev The claimable amount is equal to the amount in the cumulative earnings data stream minus the amount already claimed by the user
     /// @return The claimable amount of DAI
@@ -150,7 +150,7 @@ contract PoolManager is Ownable {
         return daiBalanceForProofWithAddress(msg.sender, _proof);
     }
 
-    /// @notice Fetch the claimable SLL for a merkle proof
+    /// @notice Fetch the claimable SLL for the msg sender with a merkle proof
     /// @param _proof The merkle proof
     /// @dev The claimable amount is equal to the amount in the cumulative earnings data stream minus the amount already claimed by the user
     /// @return The claimable amount of SLL
@@ -182,7 +182,11 @@ contract PoolManager is Ownable {
         return true;
     } 
 
-    
+    /// @notice Fetch the claimable DAI for an address with a merkle proof
+    /// @param _address The address to check DAI balance of
+    /// @param _proof The merkle proof
+    /// @dev The claimable amount is equal to the amount in the cumulative earnings data stream minus the amount already claimed by the user
+    /// @return The claimable amount of DAI
     function daiBalanceForProofWithAddress(address _address, bytes memory proof) public view returns(uint256) {
         bytes32[] memory meta;
         bytes32[] memory _proof;
@@ -208,6 +212,11 @@ contract PoolManager is Ownable {
         }
     }
 
+    /// @notice Fetch the claimable SLL for an address with a merkle proof
+    /// @param _address The address to check SLL balance of
+    /// @param _proof The merkle proof
+    /// @dev The claimable amount is equal to the amount in the cumulative earnings data stream minus the amount already claimed by the user
+    /// @return The claimable amount of SLL
     function sllBalanceForProofWithAddress(address _address, bytes memory proof) public view returns(uint256) {
         bytes32[] memory meta;
         bytes32[] memory _proof;
@@ -232,6 +241,10 @@ contract PoolManager is Ownable {
         }
     }
 
+    /// @notice Split a byte array into a specified number of bytes32 data types
+    /// @param byteArray The byte array to split
+    /// @param numBytes32 The desired amount of bytes32 data types
+    /// @return An array of the bytes32 data types and a second array of any remainder bytes32 data types beyond the desired amount
     function splitIntoBytes32(bytes memory byteArray, uint256 numBytes32) internal pure returns (bytes32[] memory bytes32Array,
                                                                                         bytes32[] memory remainder) {
         if ( byteArray.length % 32 != 0 ||
