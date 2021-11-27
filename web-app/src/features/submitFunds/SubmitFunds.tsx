@@ -1,9 +1,23 @@
 import { useForm, Controller } from "react-hook-form";
-import { Box, Button, TextField, Typography, Theme } from "@mui/material";
+import { Box, Button, CircularProgress, TextField, Typography, Theme } from "@mui/material";
 import { ethers } from "ethers";
 import { useSoleil } from "../../context/SoleilContext";
 import { useMoralis } from "react-moralis";
 import PleaseConnect from '../pleaseConnect/PleaseConnect';
+import { useEffect } from "react"
+
+const LoadingIndicator = ({ label }: { label: string }) => {
+  return <Box sx={{
+    display: "flex",
+    alignItems: "center",
+    gap: (theme) => theme.spacing(1),
+    marginTop: (theme) => theme.spacing(1)
+  }}
+  >
+    <CircularProgress size={20} />
+    <Typography>{label}</Typography>
+  </Box>
+}
 
 export const SubmitFunds = () => {
   const {
@@ -16,8 +30,6 @@ export const SubmitFunds = () => {
   const executeSoleilFunctionVariables = useExecuteSoleilFunction();
   const executeDaiFunctionVariables = useExecuteDaiFunction();
 
-  //  TODO: Either only allow donating when connected or add a wallet field to form
-
   const { handleSubmit, control, reset, formState } = useForm({
     mode: "onChange",
   });
@@ -29,15 +41,38 @@ export const SubmitFunds = () => {
   const daiAmountPlaceholder = "Enter amount in DAI";
   const numDaysPlaceholder = "Enter number of days";
 
+  useEffect(() => {
+    if (executeSoleilFunctionVariables.error !== null) {
+      window.dispatchEvent(
+        new CustomEvent("addToast", {
+          detail: {
+            content: "An error occurred",
+            severity: "error",
+            requiresManualDismiss: false,
+          },
+        })
+      )
+    }
+
+    if (executeSoleilFunctionVariables.data !== null) {
+      window.dispatchEvent(
+        new CustomEvent("addToast", {
+          detail: {
+            content: "DAI distribution created successfully",
+            severity: "success",
+            requiresManualDismiss: false,
+          },
+        })
+      )
+    }
+  }, [executeSoleilFunctionVariables.data, executeSoleilFunctionVariables.error])
+
   const onSubmit = async (data: any) => {
     const { amount, numDays } = data;
 
     const asSolidityNum = ethers.utils.parseUnits(amount.toString());
 
-    console.log(asSolidityNum);
-    console.log(numDays);
-
-    const daiResult = await executeDaiFunctionVariables.fetch({
+    await executeDaiFunctionVariables.fetch({
       functionName: "approve",
       params: {
         _spender: poolManagerContractAddress,
@@ -45,17 +80,13 @@ export const SubmitFunds = () => {
       },
     });
 
-    console.log(daiResult);
-
-    const soleilResult = await executeSoleilFunctionVariables.fetch({
+    await executeSoleilFunctionVariables.fetch({
       functionName: "setDaiPayoutSchedule",
       params: {
         _amount: asSolidityNum,
         _numOfDays: numDays,
       },
     });
-
-    console.log(soleilResult);
   };
 
   if (!isAuthenticated) {
@@ -122,15 +153,29 @@ export const SubmitFunds = () => {
           control={control}
           defaultValue={100}
         />
-        <Button
-          variant="contained"
-          disableElevation
-          disabled={!isDirty}
-          type="submit"
-          form="donation-form"
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center"
+          }}
         >
-          Submit
+          <Button
+            variant="contained"
+            disableElevation
+            disabled={!isDirty || executeDaiFunctionVariables.isLoading || executeSoleilFunctionVariables.isLoading}
+            type="submit"
+            form="donation-form"
+          >
+            Submit
         </Button>
+          {
+            executeDaiFunctionVariables.isLoading && <LoadingIndicator label="Approving" />
+          }
+          {
+            executeSoleilFunctionVariables.isLoading && <LoadingIndicator label="Submitting" />
+          }
+        </Box>
       </Box>
     </form>
   );

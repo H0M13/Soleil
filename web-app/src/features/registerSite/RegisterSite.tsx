@@ -55,7 +55,6 @@ export const RegisterSite = () => {
     }
   };
 
-  const selectedSite = "SolarEdge";
   const [activeStep, setActiveStep] = useState(0);
   const steps = ["Select your monitoring provider", "Enter Credentials"];
 
