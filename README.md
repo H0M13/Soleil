@@ -5,6 +5,9 @@
 # Devpost link
 https://devpost.com/software/soleil
 
+# Project overview video
+https://www.youtube.com/watch?v=9V7hv01URL8
+
 # Live demo (on Rinkeby)
 https://festive-wescoff-a5dded.netlify.app/
 
