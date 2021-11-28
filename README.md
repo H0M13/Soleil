@@ -2,6 +2,12 @@
 
 #### A project aiming to fight climate change by providing a way to incentivise growth in the entire solar industry with a single transaction. Solar energy producers are paid in stablecoins and funders are rewarded with native tokens based on the amount of energy produced.
 
+# Devpost link
+https://devpost.com/software/soleil
+
+# Live demo (on Rinkeby)
+https://festive-wescoff-a5dded.netlify.app/
+
 # Architecture diagram
 ![Soleil architecture diagram](https://user-images.githubusercontent.com/6655367/143323919-0cba2a68-cd1f-47ce-9049-f2849d6b7da1.png)
 
