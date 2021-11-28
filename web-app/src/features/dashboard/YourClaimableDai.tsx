@@ -18,7 +18,7 @@ import { ethers } from "ethers";
 import { useForm, Controller } from "react-hook-form";
 
 export const YourClaimableDai = () => {
-  const { claimableDai, getUsersProofForDaiEarnings } = useClaimableTokens();
+  const { claimableDai, getUsersProofForDaiEarnings, fetchClaimableDaiAmount } = useClaimableTokens();
   const { isAuthenticated } = useMoralis();
   const { useExecuteSoleilFunction } = useSoleil();
 
@@ -75,8 +75,7 @@ export const YourClaimableDai = () => {
       },
     });
 
-    // TODO:
-    // refreshClaimableDai();
+    fetchClaimableDaiAmount();
   };
 
   const toggleIsClaiming = () => {

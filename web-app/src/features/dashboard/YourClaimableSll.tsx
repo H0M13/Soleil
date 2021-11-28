@@ -16,7 +16,7 @@ import { useSoleil } from "../../context/SoleilContext";
 import { useForm, Controller } from "react-hook-form";
 
 export const YourClaimableSll = () => {
-  const { claimableSll, getUsersProofForSllEarnings } = useClaimableTokens();
+  const { claimableSll, getUsersProofForSllEarnings, fetchClaimableSllAmount } = useClaimableTokens();
   const { isAuthenticated } = useMoralis();
   const { useExecuteSoleilFunction } = useSoleil();
 
@@ -73,8 +73,7 @@ export const YourClaimableSll = () => {
       },
     });
 
-    // TODO:
-    // refreshClaimableSll();
+    fetchClaimableSllAmount();
   };
 
   const toggleIsClaiming = () => {
