@@ -36,7 +36,7 @@ Deploy this external adapter if you want to populate your own Ceramic data strea
 
 1. Either [generate a seed](https://developers.ceramic.network/authentication/key-did/provider/#3-get-seed-for-did) or use an existing seed for your Ceramic authentication. Set the `SEED` environment variable to this seed.
 1. Set the `CERAMIC_API_URL` environment variable with a read/write node on the Ceramic Clay testnet.
-1. Set `MORALIS_APPLICATION_ID` and `MORALIS_SERVER_URL` environment variables with details your Moralis server instance.
+1. Set `MORALIS_APPLICATION_ID` and `MORALIS_SERVER_URL` environment variables with details from your Moralis server instance.
 1. Run `npm run bootstrap` to pin the bootstrap your Ceramic schema and data streams. Stream IDs will be written to `config.json` files in all projects which need them.
 1. [Deploy the adapter to a cloud hosting solution](https://chainlinkadapters.com/guides/run-external-adapter-on-gcp) or run it locally.
 1. [Create a bridge between your Chainlink node and the external adapter](https://docs.chain.link/docs/node-operators/)
@@ -93,7 +93,7 @@ The SLL rewards data is then published to the cumulative SLL earnings data strea
 1. Either [generate a seed](https://developers.ceramic.network/authentication/key-did/provider/#3-get-seed-for-did) or use an existing seed for your Ceramic authentication. Set the `SEED` environment variable to this seed.
 1. Set the `CERAMIC_API_URL` environment variable with a read/write node on the Ceramic Clay testnet.
 1. Set the `RPC_URL` environment variable to your Rinkeby RPC node url.
-1. Set `MORALIS_APPLICATION_ID`, `MORALIS_SERVER_URL` and `MORALIS_MASTER_KEY` environment variables with details your Moralis server instance.
+1. Set `MORALIS_APPLICATION_ID`, `MORALIS_SERVER_URL` and `MORALIS_MASTER_KEY` environment variables with details from your Moralis server instance.
 1. [Deploy the adapter to a cloud hosting solution](https://chainlinkadapters.com/guides/run-external-adapter-on-gcp) or run it locally.
 1. [Create a bridge between your Chainlink node and the external adapter](https://docs.chain.link/docs/node-operators/)
 1. Create a CRON job for the adapter. Here's an example:
