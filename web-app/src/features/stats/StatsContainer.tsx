@@ -19,7 +19,7 @@ export const LeftStats = ({ stats }: any) => {
           stats?.aggregates ? Math.round(stats.aggregates.todayEnergyGenerated / 1000) : 0
         }kWh`}
       />
-      <Stat header="Projected DAI distributions for today" value={stats.todaysScheduledDaiPayout} />
+      <Stat header="Projected DAI distributions for today" value={parseFloat(stats.todaysScheduledDaiPayout).toFixed(2)} />
       <Stat header="Projected SLL generation for today" value={`${
           stats?.aggregates ? (stats.aggregates.todayEnergyGenerated / 1000).toFixed(2) : 0
         }`} />
