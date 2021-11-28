@@ -30,10 +30,31 @@ export const RegisterSite = () => {
       siteId,
       apiKey,
     });
-    console.log(result);
+
+    if (JSON.parse(result).success === false) {
+      window.dispatchEvent(
+        new CustomEvent("addToast", {
+          detail: {
+            content: "Unable to verify site credentials",
+            severity: "error",
+            requiresManualDismiss: false,
+          },
+        })
+      );
+    }
+    else {
+      window.dispatchEvent(
+        new CustomEvent("addToast", {
+          detail: {
+            content: "Site successfully registered",
+            severity: "success",
+            requiresManualDismiss: false,
+          },
+        })
+      );
+    }
   };
 
-  const selectedSite = "SolarEdge";
   const [activeStep, setActiveStep] = useState(0);
   const steps = ["Select your monitoring provider", "Enter Credentials"];
 
@@ -63,7 +84,7 @@ export const RegisterSite = () => {
             </Step>
           ))}
         </Stepper>
-        
+
         {
           activeStep == 0 && (
             <Box
@@ -76,14 +97,14 @@ export const RegisterSite = () => {
                 gap: (theme: Theme) => theme.spacing(4),
               }}
             >
-              <MonitoringProvider imgSrc={solarEdge} onClick={() => setActiveStep(1)}/>
+              <MonitoringProvider imgSrc={solarEdge} onClick={() => setActiveStep(1)} />
               <MonitoringProvider disabled imgSrc={enphase} />
               <MonitoringProvider disabled imgSrc={tesla} />
               <MonitoringProvider disabled imgSrc={sma} />
             </Box>
           )
         }
-        
+
         {/* <Typography
           variant="h5"
           sx={{
@@ -143,7 +164,7 @@ export const RegisterSite = () => {
                 variant="contained"
                 disableElevation
                 onClick={() => setActiveStep(0)}
-                style={{marginRight: '30px'}}
+                style={{ marginRight: '30px' }}
               >
                 Back
               </Button>

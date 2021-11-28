@@ -12,6 +12,16 @@ import soleilContract from "../../poolManagerContract.json";
 const Landing = () => {
   const { Moralis, isInitialized, user } = useMoralis();
 
+  const [numOfSites, setNumOfSites] = useState<number>();
+  useEffect(() => {
+    const getNumOfSites = async () => {
+      const sitesQuery = new Moralis.Query("Site");
+      const results = await sitesQuery.find();
+      setNumOfSites(results.length);
+    };
+    isInitialized && getNumOfSites();
+  }, [isInitialized]);
+
   const [aggregates, setAggregates] = useState<Moralis.Attributes>();
   useEffect(() => {
     const getAggregates = async () => {
@@ -51,7 +61,7 @@ const Landing = () => {
   });
   const withdrawnSllTokens = rawWithdrawnSllTokens && utils.formatEther(rawWithdrawnSllTokens.toString())
 
-  const stats = { aggregates, todaysScheduledDaiPayout, withdrawnDaiTokens, withdrawnSllTokens }
+  const stats = { numOfSites, aggregates, todaysScheduledDaiPayout, withdrawnDaiTokens, withdrawnSllTokens }
 
   return (
     <Box

@@ -9,6 +9,8 @@ interface ClaimableTokensContextValue {
   claimableSll: string;
   getUsersProofForDaiEarnings: () => Promise<string>;
   getUsersProofForSllEarnings: () => Promise<string>;
+  fetchClaimableDaiAmount: () => Promise<void>;
+  fetchClaimableSllAmount: () => Promise<void>;
 }
 
 const ClaimableTokensContext = createContext<
@@ -83,51 +85,51 @@ const ClaimableTokensProvider = ({
 
   const [claimableDai, setClaimableDai] = useState("");
 
+  const fetchClaimableDaiAmount = async () => {
+    const userAddress = toChecksumAddress(user?.attributes.ethAddress);
+    const proof = await getUsersProofForDaiEarnings();
+
+    const daiBalance =
+      proof && userAddress
+        ? await contract?.daiBalanceForProofWithAddress(userAddress, proof)
+        : "";
+
+    setClaimableDai(daiBalance ? daiBalance.toString() : "");
+  };
+
   useEffect(() => {
-    const getClaimableAmount = async () => {
-      const userAddress = toChecksumAddress(user?.attributes.ethAddress);
-      const proof = await getUsersProofForDaiEarnings();
-
-      const daiBalance =
-        proof && userAddress
-          ? await contract?.daiBalanceForProofWithAddress(userAddress, proof)
-          : "";
-
-      setClaimableDai(daiBalance ? daiBalance.toString() : "");
-    };
-
     if (
       user &&
       contract &&
       daiEarningsData &&
       daiEarningsData.content.recipients.length > 0
     ) {
-      getClaimableAmount();
+      fetchClaimableDaiAmount();
     }
   }, [daiEarningsData, contract, user]);
 
   const [claimableSll, setClaimableSll] = useState("");
 
+  const fetchClaimableSllAmount = async () => {
+    const userAddress = user?.attributes.ethAddress;
+    const proof = await getUsersProofForSllEarnings();
+
+    const sllBalance =
+      proof && userAddress
+        ? await contract?.sllBalanceForProofWithAddress(userAddress, proof)
+        : "";
+
+    setClaimableSll(sllBalance ? sllBalance.toString() : "");
+  };
+
   useEffect(() => {
-    const getClaimableAmount = async () => {
-      const userAddress = user?.attributes.ethAddress;
-      const proof = await getUsersProofForSllEarnings();
-
-      const sllBalance =
-        proof && userAddress
-          ? await contract?.sllBalanceForProofWithAddress(userAddress, proof)
-          : "";
-
-      setClaimableSll(sllBalance ? sllBalance.toString() : "");
-    };
-
     if (
       user &&
       contract &&
       sllEarningsData &&
       sllEarningsData.content.recipients.length > 0
     ) {
-      getClaimableAmount();
+      fetchClaimableSllAmount();
     }
   }, [sllEarningsData, contract, user]);
 
@@ -138,6 +140,8 @@ const ClaimableTokensProvider = ({
         claimableSll,
         getUsersProofForDaiEarnings,
         getUsersProofForSllEarnings,
+        fetchClaimableDaiAmount,
+        fetchClaimableSllAmount
       }}
     >
       {children}

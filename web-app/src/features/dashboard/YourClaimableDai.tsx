@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useClaimableTokens } from "../../context/ClaimableTokensContext";
 import { utils, BigNumber } from "ethers";
 import {
@@ -24,6 +24,32 @@ export const YourClaimableDai = () => {
 
   const { data, error, fetch, isFetching, isLoading } =
     useExecuteSoleilFunction();
+
+  useEffect(() => {
+    if (error !== null) {
+      window.dispatchEvent(
+        new CustomEvent("addToast", {
+          detail: {
+            content: "An error occurred",
+            severity: "error",
+            requiresManualDismiss: false,
+          },
+        })
+      )
+    }
+
+    if (data !== null) {
+      window.dispatchEvent(
+        new CustomEvent("addToast", {
+          detail: {
+            content: "DAI claimed successfully",
+            severity: "success",
+            requiresManualDismiss: false,
+          },
+        })
+      )
+    }
+  }, [data, error])
 
   const formattedAmount = claimableDai
     ? utils.formatEther(BigNumber.from(claimableDai))
@@ -138,7 +164,7 @@ export const YourClaimableDai = () => {
             onClick={toggleIsClaiming}
             style={{ margin: "10px 0" }}
             disabled={
-              claimableDai === undefined || parseFloat(claimableDai) <= 0
+              claimableDai === undefined || parseFloat(claimableDai) <= 0 || isLoading
             }
           >
             Claim Tokens
