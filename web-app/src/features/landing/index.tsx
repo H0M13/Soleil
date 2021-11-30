@@ -26,9 +26,13 @@ const Landing = () => {
   useEffect(() => {
     const getAggregates = async () => {
       const aggregatesQuery = new Moralis.Query("AggregateSnapshot");
-      const results = await aggregatesQuery.find();
-      results.length > 0 &&
-        setAggregates(results[results.length - 1].attributes);
+      aggregatesQuery.descending("createdAt");
+      const result = await aggregatesQuery.first();
+      setAggregates(
+        result?.attributes
+          ? result.attributes
+          : { allTimeEnergyGenerated: 0, todayEnergyGenerated: 0 }
+      );
     };
     isInitialized && getAggregates();
   }, [isInitialized]);
@@ -43,7 +47,9 @@ const Landing = () => {
     method: "timestampToDaiToDistribute",
     args: [(fullDaysSinceEpoch * secondsInDay).toString()],
   });
-  const todaysScheduledDaiPayout = rawTodaysScheduledDaiPayout && utils.formatEther(rawTodaysScheduledDaiPayout.toString())
+  const todaysScheduledDaiPayout =
+    rawTodaysScheduledDaiPayout &&
+    utils.formatEther(rawTodaysScheduledDaiPayout.toString());
 
   const rawWithdrawnDaiTokens = useContractCall({
     abi: new utils.Interface(soleilContract.abi),
@@ -51,7 +57,9 @@ const Landing = () => {
     method: "withdrawnDaiTokens",
     args: [],
   });
-  const withdrawnDaiTokens = rawWithdrawnDaiTokens && utils.formatEther(rawWithdrawnDaiTokens.toString())
+  const withdrawnDaiTokens =
+    rawWithdrawnDaiTokens &&
+    utils.formatEther(rawWithdrawnDaiTokens.toString());
 
   const rawWithdrawnSllTokens = useContractCall({
     abi: new utils.Interface(soleilContract.abi),
@@ -59,9 +67,17 @@ const Landing = () => {
     method: "withdrawnSllTokens",
     args: [],
   });
-  const withdrawnSllTokens = rawWithdrawnSllTokens && utils.formatEther(rawWithdrawnSllTokens.toString())
+  const withdrawnSllTokens =
+    rawWithdrawnSllTokens &&
+    utils.formatEther(rawWithdrawnSllTokens.toString());
 
-  const stats = { numOfSites, aggregates, todaysScheduledDaiPayout, withdrawnDaiTokens, withdrawnSllTokens }
+  const stats = {
+    numOfSites,
+    aggregates,
+    todaysScheduledDaiPayout,
+    withdrawnDaiTokens,
+    withdrawnSllTokens,
+  };
 
   return (
     <Box
