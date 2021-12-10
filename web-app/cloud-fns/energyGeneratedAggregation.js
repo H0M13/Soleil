@@ -32,8 +32,7 @@ const fetchAndCacheAggregatedEnergyStats = async () => {
     0
   );
 
-  const now = new Date();
-  const date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+  const date = new Date().toISOString().split('T')[0];
 
   const todayEnergyGenerated = response.state.next.content.sites.reduce(
     (runningTotal, site) => {
