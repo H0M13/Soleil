@@ -106,4 +106,58 @@ Also allows them to easily generate a merkle proof against the latest merkle roo
 
 ---
 
+### But government grants for solar panels already exist?
+
+- Potentially much more efficient
+- Transparent and easy to analyse
+- Anyone can participate
+- Public data feed has many more uses
+
+---
+
+## Where next?
+
+---
+
+###  Decentralise
+
+- Data sources (compare monitoring API data with satellite imaging, weather data)
+- Multiple Chainlink nodes to collaborate on maintaining data feeds
+- Governance
+
+---
+
+### More features
+
+- Give users more power over funds allocations based on secondary metrics:
+  - location
+  - age of site
+  - amount of energy fed back to grid
+
+---
+
+### Grow network
+
+- Support more monitoring APIs
+- Incentivise kick-start of network growth
+
+---
+
+### Horizontally scalable pattern
+
+Beyond the solar industry this pattern can be applied to the funding of any public good provided that:
+
+- Progress towards a common goal can be measured empirically
+- The appetite to achieve the goal is sufficient to get the network off the ground
+
+---
+
+### Some examples
+- Wind power and other sustainable sources
+- Open-source software (# of Github stars/forks?)
+- Rewilding / Reforestation
+- Funding aid in developing nations (water wells, energy, immunization rates)
+
+---
+
 # Thank you
